@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aditya Rathore — Deep Dive Cheat Book Vol. 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--bg2:#13161e;--bg3:#1a1e28;--bg4:#222736;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8eaf0;--text2:#9aa3b8;--text3:#5c6480;--accent:#7c6af7;--accent2:#a89cf8;--amber:#f0a44a;--teal:#2ec4a0;--coral:#f06b6b;--blue:#4a9ef0;--green:#5abf8a;--pink:#e06dc0;--radius:10px;--radius2:16px}
+[data-theme="light"]{--bg:#f4f5f8;--bg2:#ffffff;--bg3:#eef0f6;--bg4:#e4e6f0;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);--text:#1a1d2e;--text2:#4a5070;--text3:#8a90aa}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;font-size:15px;overflow-x:hidden}
+.reading-progress{position:fixed;top:0;left:0;width:0%;height:3px;background:linear-gradient(90deg,var(--accent),var(--teal));z-index:999;transition:width .1s}
+.layout{display:flex;min-height:100vh}
+.sidebar{position:fixed;top:0;left:0;width:250px;height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;display:flex;flex-direction:column;flex-shrink:0}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.sb-header{padding:20px 18px 14px;border-bottom:1px solid var(--border)}
+.sb-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:3px}
+.sb-sub{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.sb-nav{flex:1;padding:8px 0}
+.sb-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);padding:10px 18px 4px;font-family:'JetBrains Mono',monospace}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 18px;cursor:pointer;color:var(--text2);font-size:13px;border-left:3px solid transparent;text-decoration:none;transition:all .15s}
+.sb-item:hover{color:var(--text);background:var(--bg3)}
+.sb-item.active{color:var(--text);border-left-color:var(--accent);background:rgba(124,106,247,.08)}
+.sb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.theme-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;color:var(--text2);font-size:12px;font-family:'DM Sans',sans-serif;width:100%;transition:all .15s}
+.theme-btn:hover{color:var(--text)}
+.main{margin-left:250px;width:calc(100vw - 250px);min-width:0;overflow-x:hidden}
+/* HERO */
+.hero{background:linear-gradient(135deg,#0d0f14 0%,#151826 40%,#1a0d35 100%);padding:52px 48px 40px;border-bottom:1px solid var(--border);position:relative;overflow:hidden;box-sizing:border-box}
+[data-theme="light"] .hero{background:linear-gradient(135deg,#e8eaf8 0%,#f0eeff 100%)}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:600px;height:600px;background:radial-gradient(circle,rgba(124,106,247,.1) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(240,164,74,.12);border:1px solid rgba(240,164,74,.3);color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 12px;border-radius:20px;margin-bottom:18px}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(26px,3vw,38px);font-weight:700;line-height:1.15;margin-bottom:12px}
+.hero-title span{color:var(--accent)}
+.hero-sub{font-size:15px;color:var(--text2);max-width:640px;margin-bottom:22px;line-height:1.7}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid}
+/* SECTIONS */
+.section{padding:40px 48px;border-bottom:1px solid var(--border);box-sizing:border-box}
+.sec-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:28px}
+.sec-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.sec-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--text);margin-bottom:5px}
+.sec-meta{font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--bg3);padding:4px;border-radius:var(--radius);margin-bottom:26px;width:fit-content;flex-wrap:wrap}
+.tab-btn{padding:7px 15px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);background:transparent;border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.tab-btn.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:20px 24px;margin-bottom:12px;min-width:0;overflow:hidden}
+.card-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card-body{font-size:13.5px;color:var(--text2);line-height:1.75;word-break:break-word}
+/* Q&A */
+.qa{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;transition:border-color .2s}
+.qa:hover{border-color:var(--border2)}
+.qa.open{border-color:rgba(124,106,247,.35)}
+.qa-q{padding:13px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:var(--bg2)}
+.qa-q-text{font-size:14px;font-weight:500;color:var(--text);line-height:1.4}
+.qa-arr{color:var(--text3);font-size:16px;flex-shrink:0;transition:transform .2s;margin-top:2px}
+.qa.open .qa-arr{transform:rotate(180deg)}
+.qa-a{display:none;padding:0 16px 14px;background:var(--bg2);border-top:1px solid var(--border)}
+.qa.open .qa-a{display:block}
+.qa-body{font-size:13.5px;color:var(--text2);line-height:1.75;padding-top:12px}
+.proof{margin-top:10px;background:rgba(46,196,160,.07);border-left:3px solid var(--teal);padding:10px 14px;border-radius:0 6px 6px 0;font-size:12.5px;color:var(--text2);line-height:1.6}
+.proof-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:4px;font-family:'JetBrains Mono',monospace}
+.tip-box{margin-top:10px;background:rgba(124,106,247,.06);border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 6px 6px 0;font-size:12.5px;color:var(--text2);line-height:1.6}
+.tip-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);margin-bottom:4px;font-family:'JetBrains Mono',monospace}
+/* CHEAT CARDS */
+.cheat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:18px}
+.cc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:16px 18px;min-width:0;overflow:hidden}
+.cc-title{font-size:11.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:6px;white-space:normal;word-break:break-word}
+.cc-list{list-style:none;display:flex;flex-direction:column;gap:0}
+.cc-list li{font-size:12.5px;color:var(--text2);display:block;line-height:1.65;border-bottom:1px solid var(--border);padding:7px 0;word-break:break-word;overflow-wrap:break-word}
+.cc-list li:last-child{border-bottom:none;padding-bottom:0}
+.cc-list li:first-child{padding-top:0}
+.cc-list li strong{color:var(--text);display:inline;font-weight:600}
+.cc-list li .annot{display:block;font-size:11.5px;color:var(--text3);margin-top:2px;font-style:italic;line-height:1.5}
+/* MINDSET */
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:18px}
+.mc{border-radius:var(--radius2);padding:18px;border:1px solid;min-width:0;overflow:hidden}
+.mc-dev{background:rgba(74,158,240,.06);border-color:rgba(74,158,240,.2)}
+.mc-qa{background:rgba(90,191,138,.06);border-color:rgba(90,191,138,.2)}
+.mc-bad{background:rgba(240,107,107,.06);border-color:rgba(240,107,107,.2)}
+.mc-good{background:rgba(90,191,138,.06);border-color:rgba(90,191,138,.2)}
+.mc-lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;font-family:'JetBrains Mono',monospace}
+.mc-dev .mc-lbl{color:var(--blue)}
+.mc-qa .mc-lbl{color:var(--green)}
+.mc-bad .mc-lbl{color:var(--coral)}
+.mc-good .mc-lbl{color:var(--green)}
+.mc-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+.mc-list li{font-size:13px;color:var(--text2);display:flex;gap:8px;line-height:1.5;word-break:break-word;min-width:0}
+.mc-list li::before{content:'→';flex-shrink:0;opacity:.5}
+/* CALLOUTS */
+.callout{border-radius:var(--radius);padding:13px 16px;margin-bottom:14px;font-size:13px;line-height:1.7;border-left:3px solid}
+.c-tip{background:rgba(90,191,138,.07);border-color:var(--green);color:var(--text2)}
+.c-warn{background:rgba(240,164,74,.07);border-color:var(--amber);color:var(--text2)}
+.c-info{background:rgba(74,158,240,.07);border-color:var(--blue);color:var(--text2)}
+.c-imp{background:rgba(124,106,247,.07);border-color:var(--accent);color:var(--text2)}
+.callout b{color:var(--text)}
+/* TABLE */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px 0;border-radius:var(--radius);border:1px solid var(--border)}
+.table-wrap table{margin:0;border:none}
+.table-wrap th,.table-wrap td{border-left:none;border-right:none}
+.table-wrap tr:first-child th{border-top:none}
+.table-wrap tr:last-child td{border-bottom:none}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+th{background:var(--bg3);padding:9px 12px;text-align:left;font-weight:600;color:var(--text);border:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+td{padding:9px 12px;border:1px solid var(--border);color:var(--text2);vertical-align:top;line-height:1.5;word-break:break-word;min-width:100px}
+tr:hover td{background:var(--bg3)}
+/* CODE */
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg4);padding:1px 7px;border-radius:4px;color:var(--teal);word-break:break-all}
+pre{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin:10px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal);line-height:1.7;white-space:pre-wrap;word-break:break-word}
+/* MODERN BOX */
+.modern{background:linear-gradient(135deg,rgba(124,106,247,.08),rgba(46,196,160,.06));border:1px solid rgba(124,106,247,.2);border-radius:var(--radius2);padding:18px 22px;margin-bottom:14px}
+.modern-lbl{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;font-family:'JetBrains Mono',monospace}
+.modern-body{font-size:13.5px;color:var(--text2);line-height:1.75}
+/* GRIDS */
+.g2{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.g3{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:20px 0}
+/* WORKFLOW */
+.wf{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;margin-bottom:14px}
+.wf-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px}
+.wf-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:6px}
+.wf-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.wf-conn{width:1px;height:14px;margin-left:13px;background:var(--border2)}
+.wf-title2{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.wf-desc{font-size:12.5px;color:var(--text2);line-height:1.6;word-break:break-word}
+/* STAR STORY */
+.star{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:20px 22px;margin-bottom:14px}
+.star-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:12px;font-family:'JetBrains Mono',monospace}
+.star-parts{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:10px}
+.star-part{background:var(--bg3);border-radius:var(--radius);padding:12px}
+.sp-lbl{font-size:10px;font-weight:700;color:var(--accent2);margin-bottom:6px;font-family:'JetBrains Mono',monospace;letter-spacing:.08em}
+.sp-text{font-size:12.5px;color:var(--text2);line-height:1.6}
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+/* FOOTER */
+.footer{padding:28px 48px;text-align:center;color:var(--text3);font-size:13px;border-top:1px solid var(--border)}
+.footer a{color:var(--accent2);text-decoration:none}
+/* Section & all content containers always respect bounds */
+.section *{max-width:100%}
+.wf,.star,.card,.cc,.modern,.callout{overflow-wrap:break-word;word-break:break-word}
+/* Mid-range desktop: prevent cheat-grid items from becoming too narrow */
+@media(min-width:901px) and (max-width:1200px){.cheat-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}.g3{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
+@media(max-width:900px){.layout{display:block}.sidebar{display:none}.main{margin-left:0;width:100%}.hero{padding:36px 24px 28px}.mg,.g2,.g3,.star-parts,.cheat-grid{grid-template-columns:1fr}.section{padding:20px 16px}.footer{padding:20px 16px}}
+</style>
+</head>
+<body>
+<div class="reading-progress" id="rp"></div>
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-header">
+    <div class="sb-title">Cheat Book Vol. 2</div>
+    <div class="sb-sub">Aditya Rathore · Deep Dive</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-label">Quick Reference</div>
+    <a class="sb-item active" href="#cheatsheet"><span class="sb-dot" style="background:#7c6af7"></span>Master Cheat Sheets</a>
+    <div class="sb-label">Advanced Q&A Banks</div>
+    <a class="sb-item" href="#sfmc-adv"><span class="sb-dot" style="background:#7c6af7"></span>SFMC Advanced</a>
+    <a class="sb-item" href="#sc-adv"><span class="sb-dot" style="background:#2ec4a0"></span>Service Cloud Advanced</a>
+    <a class="sb-item" href="#ec-adv"><span class="sb-dot" style="background:#f0a44a"></span>Experience Cloud Adv.</a>
+    <a class="sb-item" href="#pw-adv"><span class="sb-dot" style="background:#4a9ef0"></span>Playwright Advanced</a>
+    <a class="sb-item" href="#ci-adv"><span class="sb-dot" style="background:#f06b6b"></span>CI/CD Advanced</a>
+    <div class="sb-label">Career Toolkit</div>
+    <a class="sb-item" href="#transition-deep"><span class="sb-dot" style="background:#5abf8a"></span>QA→Automation Deep</a>
+    <a class="sb-item" href="#star-bank"><span class="sb-dot" style="background:#f0a44a"></span>STAR Stories Bank</a>
+    <a class="sb-item" href="#salary"><span class="sb-dot" style="background:#e06dc0"></span>Salary Negotiation</a>
+    <a class="sb-item" href="#ask-them"><span class="sb-dot" style="background:#5abf8a"></span>Questions to Ask Them</a>
+    <div class="sb-label">Mindset & Modern</div>
+    <a class="sb-item" href="#mindsets"><span class="sb-dot" style="background:#4a9ef0"></span>Full Mindset Breakdowns</a>
+    <a class="sb-item" href="#modern"><span class="sb-dot" style="background:#7c6af7"></span>Modern Project Practices</a>
+    <a class="sb-item" href="#business-wf"><span class="sb-dot" style="background:#2ec4a0"></span>Business Workflows Ref</a>
+  </nav>
+  <div class="sb-footer">
+    <button class="theme-btn" onclick="toggleTheme()">☀ Toggle Light Mode</button>
+  </div>
+</aside>
+<!-- MAIN -->
+<main class="main">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">📚 Vol. 2 — 400+ Q&As, Cheat Sheets, STAR Bank, Negotiation Scripts</div>
+  <h1 class="hero-title">Advanced Interview Prep<br><span>Deep Dive Cheat Book</span></h1>
+  <p class="hero-sub">Everything Vol. 1 didn't cover: deeper Q&A banks across all 5 technologies, master cheat sheets for quick review, full mindset breakdowns, 8 STAR stories ready to adapt, salary negotiation scripts, smart questions to ask interviewers, and modern project practice guides.</p>
+  <div class="hero-chips">
+    <span class="chip" style="background:rgba(124,106,247,.1);border-color:rgba(124,106,247,.3);color:#a89cf8">🟣 SFMC</span>
+    <span class="chip" style="background:rgba(46,196,160,.1);border-color:rgba(46,196,160,.3);color:#5dd4b8">🟢 Service Cloud</span>
+    <span class="chip" style="background:rgba(240,164,74,.1);border-color:rgba(240,164,74,.3);color:#f5c070">🟡 Experience Cloud</span>
+    <span class="chip" style="background:rgba(74,158,240,.1);border-color:rgba(74,158,240,.3);color:#7ab8f5">🔵 Playwright</span>
+    <span class="chip" style="background:rgba(240,107,107,.1);border-color:rgba(240,107,107,.3);color:#f58a8a">🔴 CI/CD</span>
+    <span class="chip" style="background:rgba(90,191,138,.1);border-color:rgba(90,191,138,.3);color:#7dd4a8">🟩 QA→Automation</span>
+  </div>
+</section>
+
+<!-- =================== MASTER CHEAT SHEETS =================== -->
+<section id="cheatsheet" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(124,106,247,.15)">📋</div>
+    <div><h2 class="sec-title">Master Cheat Sheets</h2>
+    <div class="sec-meta">One-glance reference cards for every technology — print and review before interviews</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'cs','sfmc')">SFMC</button>
+    <button class="tab-btn" onclick="switchTab(this,'cs','sc')">Service Cloud</button>
+    <button class="tab-btn" onclick="switchTab(this,'cs','ec')">Experience Cloud</button>
+    <button class="tab-btn" onclick="switchTab(this,'cs','pw')">Playwright</button>
+    <button class="tab-btn" onclick="switchTab(this,'cs','cicd')">CI/CD</button>
+    <button class="tab-btn" onclick="switchTab(this,'cs','api')">API Testing</button>
+  </div>
+
+  <div id="cs-sfmc" class="tab-content active">
+    <div class="cheat-grid">
+      <div class="cc">
+        <div class="cc-title" style="color:#7c6af7">Journey Builder Key Facts</div>
+        <ul class="cc-list">
+          <li><strong>Entry sources:</strong> Data Extension, API Event, Salesforce Data, CloudPages, Audience</li>
+          <li><strong>Activities:</strong> Email Send, SMS, Wait, Decision Split, Engagement Split, Update Contact</li>
+          <li><strong>Test Mode limit:</strong> 10 contacts max, bypasses Wait activities</li>
+          <li><strong>Re-entry:</strong> Configure — default is No Re-entry</li>
+          <li><strong>Decision Split:</strong> Up to 10 paths + default; first match wins</li>
+          <li><strong>Engagement Split:</strong> Routes on Opens/Clicks/Not Opened after wait window</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#7c6af7">Automation Studio Activity Order</div>
+        <ul class="cc-list">
+          <li><strong>SQL Query:</strong> Transform/segment data between DEs</li>
+          <li><strong>Filter Activity:</strong> Apply Subscriber Filter to DE</li>
+          <li><strong>Data Extract:</strong> Export DE to CSV file</li>
+          <li><strong>File Transfer:</strong> Move file to/from SFTP</li>
+          <li><strong>Import File:</strong> Bring CSV into DE from SFTP</li>
+          <li><strong>Overwrite vs Append vs Update:</strong> Overwrite=replace all; Append=add rows; Update=patch matching rows</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#7c6af7">AMPscript Quick Reference</div>
+        <ul class="cc-list">
+          <li><strong>AttributeValue('Field')</strong> — Get subscriber attribute</li>
+          <li><strong>Lookup('DE','ReturnFld','LookupFld',@v)</strong> — Single value lookup</li>
+          <li><strong>LookupRows('DE','Field',@v)</strong> — Returns rowset</li>
+          <li><strong>Field(@row,'Col')</strong> — Value from LookupRows rowset</li>
+          <li><strong>IIf(cond,true,false)</strong> — Inline conditional</li>
+          <li><strong>Empty(@var)</strong> — True for both NULL and empty string</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#7c6af7">SFMC Data Views (SQL)</div>
+        <ul class="cc-list">
+          <li><strong>_Subscribers</strong> — All subscriber records + status</li>
+          <li><strong>_Sent</strong> — Every individual send event</li>
+          <li><strong>_Open</strong> — Open tracking (6 months)</li>
+          <li><strong>_Click</strong> — Link click events (6 months)</li>
+          <li><strong>_Bounce</strong> — Soft and hard bounces</li>
+          <li><strong>_UnsubEvent</strong> — Unsubscribe events</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#7c6af7">SFMC REST API Key Endpoints</div>
+        <ul class="cc-list">
+          <li><strong>POST /v2/token</strong> — Get OAuth 2.0 access token (valid 20 min)</li>
+          <li><strong>POST /interaction/v1/events</strong> — Journey API Event entry</li>
+          <li><strong>POST /data/v1/async/dataextensions/key:{k}/rows</strong> — Upsert DE records</li>
+          <li><strong>GET /data/v1/customobjectdata/key:{k}/rowset</strong> — Query DE records</li>
+          <li><strong>POST /messaging/v1/messageDefinitionSends/key:{k}/send</strong> — Triggered Send</li>
+          <li><strong>Errors:</strong> 401=expired token · 400=bad payload · 429=rate limited</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#7c6af7">SFMC QA Test Checklist</div>
+        <ul class="cc-list">
+          <li>✅ All Decision Split paths incl. Default tested</li>
+          <li>✅ AMPscript with NULL, empty string, special chars</li>
+          <li>✅ SubscriberKey exists in All Subscribers for each test contact</li>
+          <li>✅ Journey deduplication: same contact enters twice</li>
+          <li>✅ Unsubscribe propagation at Global + List level</li>
+          <li>✅ Automation Studio Last Run Status checked after each run</li>
+          <li>✅ DE row counts match source after import/SQL query</li>
+          <li>✅ API 401 token expiry handled gracefully</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout c-tip"><b>Interview power phrase:</b> "I treat SFMC data integrity as a compliance risk — a missed unsubscribe propagation isn't just a bug, it's a potential CAN-SPAM violation. My SQL validation scripts are non-negotiable before any production send."</div>
+  </div>
+
+  <div id="cs-sc" class="tab-content">
+    <div class="cheat-grid">
+      <div class="cc">
+        <div class="cc-title" style="color:#2ec4a0">Omni-Channel Objects Map</div>
+        <ul class="cc-list">
+          <li><strong>Service Channel:</strong> Which object is routed (Case, Lead, Chat)</li>
+          <li><strong>Routing Config:</strong> Priority + Capacity + Routing Model per queue</li>
+          <li><strong>Queue:</strong> Work waits here before agent pickup</li>
+          <li><strong>Presence Config:</strong> Which statuses agents can have</li>
+          <li><strong>Presence Status:</strong> Agent's current availability state</li>
+          <li><strong>Routing Models:</strong> Most Available · Least Active · External</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#2ec4a0">Case Automation Rules</div>
+        <ul class="cc-list">
+          <li><strong>Assignment Rule:</strong> Who owns case (user or queue)</li>
+          <li><strong>Auto-Response Rule:</strong> Automated email to submitter</li>
+          <li><strong>Escalation Rule:</strong> Time-based priority escalation</li>
+          <li><strong>Validation Rule:</strong> Required fields, format enforcement</li>
+          <li><strong>Record-Triggered Flow:</strong> Any automation on create/update</li>
+          <li><strong>Gotcha:</strong> Only ONE assignment rule set active at a time</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#2ec4a0">Entitlement Process Anatomy</div>
+        <ul class="cc-list">
+          <li><strong>Entitlement:</strong> Customer's right to support (linked to Account/Contact)</li>
+          <li><strong>Entitlement Process:</strong> Template with milestones applied to cases</li>
+          <li><strong>Milestone:</strong> Checkpoint with deadline (First Response, Resolution)</li>
+          <li><strong>Milestone Triggers:</strong> Success · Warning · Violation</li>
+          <li><strong>Business Hours:</strong> Applies to milestone time if configured</li>
+          <li><strong>Test shortcut:</strong> Shorten milestone to 5 min in sandbox</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#2ec4a0">Salesforce Flow Types</div>
+        <ul class="cc-list">
+          <li><strong>Record-Triggered:</strong> Before/After Create, Update, Delete</li>
+          <li><strong>Screen Flow:</strong> User-facing wizard with input screens</li>
+          <li><strong>Autolaunched:</strong> Called from Apex, API, or another Flow</li>
+          <li><strong>Schedule-Triggered:</strong> Runs at set time on batch of records</li>
+          <li><strong>Platform Event:</strong> Triggered by Salesforce Platform Events</li>
+          <li><strong>Critical:</strong> User context vs System context — FLS/CRUD applies in user context</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#2ec4a0">Service Cloud QA Checklist</div>
+        <ul class="cc-list">
+          <li>✅ Assignment rules: all entries tested + no-match fallback</li>
+          <li>✅ Omni-Channel capacity enforcement at max limit</li>
+          <li>✅ Skills routing: only correct-skill agents receive work</li>
+          <li>✅ Entitlement milestones: all 3 trigger points tested</li>
+          <li>✅ LWC tested as FLS-restricted user (graceful degradation)</li>
+          <li>✅ Flow tested as end user, not admin</li>
+          <li>✅ Internal case comments NOT visible in portal</li>
+          <li>✅ Cross-browser: Console on Chrome + Firefox + Safari</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="cs-ec" class="tab-content">
+    <div class="cheat-grid">
+      <div class="cc">
+        <div class="cc-title" style="color:#f0a44a">Access Control Layers (in order)</div>
+        <ul class="cc-list">
+          <li><strong>1. License:</strong> What objects/features can user type access at all?</li>
+          <li><strong>2. Profile:</strong> Baseline CRUD, FLS, page layouts, app access</li>
+          <li><strong>3. Permission Set:</strong> Additive extra access on top of profile</li>
+          <li><strong>4. OWD:</strong> Record-level baseline (Private/Public Read/R+W)</li>
+          <li><strong>5. Role Hierarchy:</strong> Managers see subordinates' records</li>
+          <li><strong>6. Sharing Rules:</strong> Open access for specific groups/criteria</li>
+          <li><strong>7. Manual Sharing:</strong> One-off record-level sharing</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#f0a44a">Guest User Restrictions (post-2021)</div>
+        <ul class="cc-list">
+          <li>Cannot access records owned by internal users without explicit sharing</li>
+          <li>"Grant Access Using Hierarchy" disabled for guest users</li>
+          <li>CRUD limited to what Guest User Profile grants explicitly</li>
+          <li>Flows running as guest: explicit object permissions required</li>
+          <li>Test in full incognito — logged-out browser may cache session</li>
+          <li>Any PII visible to guest = Critical defect</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#f0a44a">Experience Cloud User Types</div>
+        <ul class="cc-list">
+          <li><strong>Guest:</strong> Unauthenticated, Guest User Profile, most restricted</li>
+          <li><strong>Customer Community:</strong> Self-service, limited objects, cheapest license</li>
+          <li><strong>Customer Community Plus:</strong> More objects, reports, sharing rules apply</li>
+          <li><strong>Partner Community:</strong> Deal registration, leads, most object access</li>
+          <li><strong>External OWD:</strong> Separate from internal OWD — controls external record access</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#f0a44a">Experience Cloud QA Checklist</div>
+        <ul class="cc-list">
+          <li>✅ Tested in incognito as true unauthenticated guest</li>
+          <li>✅ Direct record URL tested (not just list view)</li>
+          <li>✅ All personas: guest, standard external, enhanced, internal</li>
+          <li>✅ Flow tested as external user (user context, not system)</li>
+          <li>✅ Internal-only fields hidden from portal components</li>
+          <li>✅ Self-registration: duplicate email, password policy</li>
+          <li>✅ DevTools Network tab inspected for data leaks</li>
+          <li>✅ Mobile browser: iOS Safari + Android Chrome</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="cs-pw" class="tab-content">
+    <div class="cheat-grid">
+      <div class="cc">
+        <div class="cc-title" style="color:#4a9ef0">Locator Priority (Best → Worst)</div>
+        <ul class="cc-list">
+          <li><strong>1st:</strong> <code>getByRole('button',{name:'Submit'})</code> — semantic, resilient</li>
+          <li><strong>2nd:</strong> <code>getByLabel('Email')</code> — accessibility-based</li>
+          <li><strong>3rd:</strong> <code>getByPlaceholder('Search...')</code></li>
+          <li><strong>4th:</strong> <code>getByText('Continue')</code> — visible text</li>
+          <li><strong>5th:</strong> <code>getByTestId('submit-btn')</code> — data-testid</li>
+          <li><strong>Avoid:</strong> CSS dynamic classes, XPath, index-based selectors</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#4a9ef0">playwright.config.ts Key Settings</div>
+        <ul class="cc-list">
+          <li><strong>timeout:</strong> 30000 — global action timeout (ms)</li>
+          <li><strong>expect.timeout:</strong> 5000 — assertion retry timeout</li>
+          <li><strong>retries:</strong> 2 in CI, 0 locally</li>
+          <li><strong>workers:</strong> 4 — parallel test workers</li>
+          <li><strong>trace:</strong> 'on-first-retry' — capture on retry</li>
+          <li><strong>screenshot:</strong> 'only-on-failure'</li>
+          <li><strong>video:</strong> 'retain-on-failure'</li>
+          <li><strong>baseURL:</strong> 'https://staging.example.com'</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#4a9ef0">Flaky Test Diagnosis Checklist</div>
+        <ul class="cc-list">
+          <li>❓ Dynamic class in locator? → Switch to getByRole/getByLabel</li>
+          <li>❓ Hardcoded waitForTimeout()? → Replace with waitForResponse</li>
+          <li>❓ Tests sharing state (cookies, DB records)?</li>
+          <li>❓ Parallel workers use same test data record?</li>
+          <li>❓ Network timing variance? → Use waitForResponse()</li>
+          <li>❓ Element animating during assertion?</li>
+          <li>🔧 Open Trace Viewer — replay failure frame-by-frame</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#4a9ef0">POM Design Rules</div>
+        <ul class="cc-list">
+          <li>Each page = one class in /pages directory</li>
+          <li>Locators are private properties — never in test files</li>
+          <li>Actions are public async methods</li>
+          <li>BasePage holds shared utilities and navigation helpers</li>
+          <li>Fixtures inject page objects — not constructor in tests</li>
+          <li>Method names: user intent (<code>login()</code> not <code>clickSubmitButton()</code>)</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#4a9ef0">Playwright CLI Commands</div>
+        <ul class="cc-list">
+          <li><code>npx playwright test</code> — run all tests</li>
+          <li><code>npx playwright test --headed</code> — visible browser</li>
+          <li><code>npx playwright test --debug</code> — step-by-step inspector</li>
+          <li><code>npx playwright test --grep "login"</code> — filter by name</li>
+          <li><code>npx playwright show-report</code> — open HTML report</li>
+          <li><code>npx playwright show-trace trace.zip</code> — Trace Viewer</li>
+          <li><code>npx playwright codegen https://example.com</code> — record test</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#4a9ef0">API Testing Pattern</div>
+        <ul class="cc-list">
+          <li><code>const ctx = await request.newContext({baseURL, extraHTTPHeaders})</code></li>
+          <li><code>const res = await ctx.post('/api/cases', {data: payload})</code></li>
+          <li><code>expect(res.status()).toBe(201)</code></li>
+          <li><code>const body = await res.json(); expect(body.id).toBeTruthy()</code></li>
+          <li>No browser needed for pure API tests — fastest execution</li>
+          <li>Add to CI pipeline as first gate (runs in seconds)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="cs-cicd" class="tab-content">
+    <div class="cheat-grid">
+      <div class="cc">
+        <div class="cc-title" style="color:#f06b6b">GitHub Actions Key Concepts</div>
+        <ul class="cc-list">
+          <li><strong>Workflow:</strong> YAML file in .github/workflows/ — full pipeline</li>
+          <li><strong>Job:</strong> Group of steps on same machine</li>
+          <li><strong>Step:</strong> Individual command or reusable Action</li>
+          <li><strong>Runner:</strong> VM (ubuntu-latest, windows, macos)</li>
+          <li><strong>Trigger (on:):</strong> push, pull_request, schedule, workflow_dispatch</li>
+          <li><strong>Secrets:</strong> ${{ secrets.NAME }} — never logged</li>
+          <li><strong>Matrix:</strong> Run same job across multiple configs in parallel</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#f06b6b">GitHub Actions vs Azure DevOps</div>
+        <ul class="cc-list">
+          <li><strong>Both:</strong> YAML pipelines, parallel jobs, artifact upload, test reporting</li>
+          <li><strong>GHA wins:</strong> Simpler syntax, huge marketplace, native GitHub</li>
+          <li><strong>ADO wins:</strong> Multi-stage releases, environment approval gates, Azure integration, richer test reporting</li>
+          <li><strong>Your experience:</strong> GitHub Actions (Horizontal Digital) + Azure DevOps (Kafene)</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#f06b6b">Pipeline Timing Targets</div>
+        <ul class="cc-list">
+          <li><strong>Lint + Type-check:</strong> &lt; 1 minute</li>
+          <li><strong>Unit tests:</strong> &lt; 3 minutes</li>
+          <li><strong>Integration tests:</strong> &lt; 5 minutes</li>
+          <li><strong>E2E smoke suite:</strong> &lt; 8 minutes</li>
+          <li><strong>Full E2E regression (sharded):</strong> &lt; 20 minutes</li>
+          <li><strong>Total PR gate target:</strong> &lt; 15 minutes</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#f06b6b">QA Responsibilities in CI/CD</div>
+        <ul class="cc-list">
+          <li>Design + maintain E2E suite running as quality gate</li>
+          <li>Set pass/fail thresholds (100% smoke, 95% regression)</li>
+          <li>Monitor flaky rate (target: &lt;2% of executions)</li>
+          <li>Upload artifacts: HTML report + screenshots + traces on failure</li>
+          <li>Manage environment configs — base URLs, API keys per env</li>
+          <li>Advocate for no pipeline bypass — hotfixes need tests too</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout c-imp"><b>Your power statement:</b> "At Horizontal Digital I owned the quality gate — our Playwright suite in GitHub Actions was the last defence before code reached production. At Kafene, Azure DevOps pipeline integration reduced hotfix cycles because we caught regressions before deployment, not after."</div>
+  </div>
+
+  <div id="cs-api" class="tab-content">
+    <div class="cheat-grid">
+      <div class="cc">
+        <div class="cc-title" style="color:#5abf8a">REST API Testing Checklist</div>
+        <ul class="cc-list">
+          <li>✅ Auth: valid token=200, expired=401, missing=401</li>
+          <li>✅ Happy path: correct payload returns 200/201</li>
+          <li>✅ Missing required field: 400 Bad Request</li>
+          <li>✅ Wrong data type: 400</li>
+          <li>✅ Unauthorized: 401 or 403</li>
+          <li>✅ Not found: 404</li>
+          <li>✅ Rate limit: 429 with Retry-After header</li>
+          <li>✅ Response schema: field names, types, structure validated</li>
+          <li>✅ Data persisted: verify in DB/DE after write call</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#5abf8a">HTTP Status Codes to Know</div>
+        <ul class="cc-list">
+          <li><strong>200 OK</strong> — Success (GET, PUT, PATCH)</li>
+          <li><strong>201 Created</strong> — Resource created (POST)</li>
+          <li><strong>204 No Content</strong> — Success no body (DELETE)</li>
+          <li><strong>400 Bad Request</strong> — Invalid payload/params</li>
+          <li><strong>401 Unauthorized</strong> — Missing/invalid auth</li>
+          <li><strong>403 Forbidden</strong> — Auth ok, insufficient permissions</li>
+          <li><strong>404 Not Found</strong> — Resource doesn't exist</li>
+          <li><strong>409 Conflict</strong> — Duplicate or state conflict</li>
+          <li><strong>422 Unprocessable</strong> — Business logic violation</li>
+          <li><strong>429 Rate Limited</strong> — Too many requests</li>
+          <li><strong>500 Server Error</strong> — Server-side failure</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#5abf8a">SFMC API-Specific Patterns</div>
+        <ul class="cc-list">
+          <li><strong>Token lifetime:</strong> 20 minutes — implement refresh logic</li>
+          <li><strong>Async DE operations:</strong> POST returns requestId; poll for status</li>
+          <li><strong>Bulk insert limit:</strong> 50 records sync; use async for larger</li>
+          <li><strong>Journey fire:</strong> API Event response is immediate; journey processing is async</li>
+          <li><strong>SOAP namespace:</strong> <code>xmlns:ExactTarget</code> required</li>
+          <li><strong>Rate limit:</strong> ~2000 requests/min on some endpoints — test 429 handling</li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:#5abf8a">Postman → Playwright Migration</div>
+        <ul class="cc-list">
+          <li>Postman: manual, exploration, documentation</li>
+          <li>Playwright: automated, CI-integrated, TypeScript, version-controlled</li>
+          <li>Migrate: convert collection to <code>request.newContext()</code> tests</li>
+          <li>Add assertions: <code>expect(res.status()).toBe(200)</code></li>
+          <li>Add schema validation: use <code>zod</code> or <code>ajv</code></li>
+          <li>Add to CI — API tests run without browser (fastest gate)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== SFMC ADVANCED Q&A =================== -->
+<section id="sfmc-adv" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(124,106,247,.15)">📧</div>
+    <div><h2 class="sec-title">SFMC — Advanced Q&A</h2>
+    <div class="sec-meta">12 advanced questions interviewers ask senior SFMC QA engineers</div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">What's the difference between Triggered Sends and Journey Builder for transactional emails?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Triggered Sends (via Email Studio) are optimized for immediate 1:1 transactional sends — order confirmations, password resets, OTPs. They fire via API with minimal latency and are designed for single-email transactions without orchestration. Journey Builder is better when you need multi-step workflows — send an email, wait 2 days, check if clicked, send a follow-up. Key differences: Triggered Sends have lower latency and simpler setup; Journey Builder supports complex branching and multi-channel orchestration but has higher processing overhead. For pure transactional high-volume sends (millions of order confirmations per day), Triggered Send is the right architecture. For nurture, lifecycle, or multi-step campaigns, Journey Builder wins. When testing Triggered Sends: validate API payload structure matches the Triggered Send Definition exactly, verify AMPscript renders correctly with payload data (not DE lookup), and test send speed under expected load volume.
+      <div class="tip-box"><div class="tip-lbl">Interview angle</div>Mentioning this distinction shows architectural understanding, not just feature knowledge — it signals senior-level thinking.</div>
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you test suppression lists and opt-out compliance in SFMC?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Suppression testing is highest-risk in SFMC QA — sending to someone who opted out is a CAN-SPAM/GDPR violation. My testing covers three layers. Global suppression: I add a test email to All Subscribers as Unsubscribed, then trigger a send including that address — verify the contact appears in _Sent with Suppressed status, not Sent. List-level unsubscribe: I unsubscribe a test contact from Publication List A, then send from Publication List B — verify they receive List B (list-level unsubscribe is more granular than global). Suppression DE: many orgs use a custom suppression DE in Automation Studio SQL to exclude contacts before send. I test that SQL correctly excludes all suppressed contacts and that the suppression DE is refreshed before every send. Finally, I validate the preference center — clicking "Unsubscribe" in a real email updates subscriber status within SFMC within the expected processing time.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">Explain Marketing Cloud Connect — what can go wrong from a QA perspective?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Marketing Cloud Connect bridges Salesforce CRM and SFMC. The QA risks: (1) Subscriber Key mismatch — if Subscriber Key in SFMC doesn't match the Contact ID in CRM, sends fail silently. I test by cross-referencing Subscriber Keys between Synchronized DE and _Subscribers data view on a random sample. (2) Sync delays — MCC syncs every 15 minutes by default. I test time-sensitive journeys by verifying that a CRM Contact change propagates to SFMC within the expected sync window before the next scheduled send. (3) Field mapping errors — if a CRM field is renamed, the Synchronized DE mapping can break silently. I test by making a test field change in sandbox CRM and verifying the sync doesn't error. (4) Deleted record handling — I test what happens in SFMC when a CRM Contact is deleted: subscriber should remain active in SFMC for historical tracking, not be removed.
+      <div class="proof"><div class="proof-lbl">Your proof point</div>At Cognizant: validated CRM-to-SFMC sync integrity across 1M+ contact records post-migration before loyalty campaign go-live.</div>
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">A marketing send went to 50,000 wrong contacts. Walk me through your investigation and prevention.</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Immediate investigation: pull _Sent data view to identify all subscribers who received the send, cross-reference against the intended audience DE to understand scope. Trace back to the entry source — was this a Journey or direct send? Was a wrong DE used? Did a Decision Split path misbehave? Root cause analysis — most wrong-audience sends come from: (1) using the wrong DE as entry source (naming confusion, wrong environment), (2) SQL query bug in Automation Studio producing incorrect segment, (3) Decision Split condition error routing everyone to the same path, or (4) no pre-send audience review under sprint pressure. Prevention I'd implement: mandatory pre-send QA checklist with audience SIZE validation (if expected 5,000 but DE shows 50,000, stop and investigate), test contact seeding and content preview before every send, SQL query peer review for Automation Studio, staging dry-run with count verification before production execution, and an alert when send audience is more than 20% larger than the previous comparable send.
+      <div class="tip-box"><div class="tip-lbl">Show process maturity</div>Proposing preventive controls — not just fixing the immediate issue — demonstrates senior-level thinking that interviewers look for.</div>
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you test multi-business-unit (BU) setups in SFMC?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Multi-BU setups have a parent Enterprise account with child Business Units for each brand or region. Subscribers are managed at Enterprise level (shared All Subscribers list) while sends happen at BU level. QA considerations: Subscriber isolation — verify DEs and subscribers in BU A are not accessible from BU B unless shared data extensions are explicitly configured. From address management — each BU has its own verified From Addresses; test that emails from BU A use BU A's domain not BU B's. Shared templates — if Content Builder assets are shared across BUs, test that a template change in the parent doesn't break child BU email rendering. Cross-BU journey entry — if a journey in BU A triggers sends from BU B, verify the subscriber exists in the correct publication list for both BUs. This scenario came up at Cognizant with a global restaurant chain that had regional BUs — I had to test that UK subscribers received emails from the UK BU domain and US subscribers from the US BU domain, with correct personalization for each region.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How does SFMC handle bounce management and what do you specifically test?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">SFMC automatically manages bounces and updates subscriber status. Hard bounces (permanent — address doesn't exist) cause SFMC to set subscriber status to "Bounced" — excluded from future sends. Soft bounces (temporary — mailbox full, server timeout) are tracked but status doesn't change immediately; after a configured threshold of soft bounces, the subscriber is treated as a hard bounce. For QA testing: I validate the _Bounce data view after a test send to verify bounce events are captured with correct BounceType codes (HardBounce vs SoftBounce). I verify a contact with Bounced status in All Subscribers is excluded from subsequent sends (check _Sent status — should show Excluded, not Sent). I test the bounce notification delivery to the designated monitoring inbox. I also test bounce processing timing — bounce status updates aren't always immediate, so I verify within the expected processing window rather than immediately after send.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">What is Einstein in SFMC and how do you test non-deterministic AI features?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Einstein in SFMC includes Send Time Optimization (STO — AI-driven per-individual send timing), Einstein Content Selection (dynamic content based on predicted engagement), Einstein Recommendations (product/content recommendations via AMPscript), and Engagement Scoring (subscriber engagement likelihood scores). AI features are non-deterministic — you can't test for exact output. Instead I validate the integration and behavior boundaries: Einstein STO enabled on a journey send activity — verify individual send times vary across test contacts (not all at identical time). For Einstein Recommendations: verify the REST API call returns recommendations in the expected JSON schema, and that AMPscript renders recommended products correctly — testing with contacts who have and don't have sufficient engagement history (fallback content must render correctly for new subscribers with no history). For STO: verify the feature degrades gracefully when there's insufficient send history — falls back to a configured default send time, not no send at all.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you test email rendering across clients?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Email rendering is notoriously inconsistent — HTML/CSS that works in Gmail breaks in Outlook, which uses Microsoft Word's rendering engine (not a real browser engine). My approach: I use Litmus or Email on Acid integrated with SFMC for automated rendering previews across 90+ email clients. Before every template launch I specifically check: Outlook 2019/365 (most restrictive — no CSS Grid, no Flexbox, limited modern CSS), Gmail App on Android (different from Gmail desktop), Apple Mail on iOS (supports most features but has unique quirks), and dark mode rendering (content must remain readable when OS inverts colors). I also test AMPscript's impact on rendering — server-side code errors can break the HTML structure entirely. And I validate images: correct dimensions, alt texts showing when images are blocked (common in corporate clients), fallback fonts when specified font isn't available, and mobile responsiveness. I document rendering issues with screenshots and categorize as critical (unreadable content) vs cosmetic (minor layout shift).
+    </div></div>
+  </div>
+</section>
+
+<!-- =================== SERVICE CLOUD ADVANCED =================== -->
+<section id="sc-adv" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(46,196,160,.15)">🎧</div>
+    <div><h2 class="sec-title">Service Cloud — Advanced Q&A</h2>
+    <div class="sec-meta">10 advanced questions on Service Cloud depth topics</div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you test Einstein Bots / AI Chat in Service Cloud?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Einstein Bot testing is unique because you're testing both conversation logic and AI intent classification. Intent coverage: I create a test matrix of utterances for every configured intent ("I need help with my order", "How do I track my package") and verify the bot classifies them correctly into the right dialog path. I also test edge cases — typos, ambiguous phrasing, multi-intent utterances. Fallback testing: I deliberately use phrases that don't match any intent to verify the bot escalates to a human agent gracefully rather than looping or giving a confusing response. Variable extraction: for bots that extract entities (order number, email) from user input, I test with valid formats, invalid formats, and missing information. Escalation paths: test every escalation trigger — explicit "speak to agent" request, confusion after N failed intent matches, after-hours escalation. Handoff quality: does the agent receive the full chat transcript? Are extracted variables correctly passed to the case or agent workspace? Finally, I test across web chat and mobile chat surfaces since rendering and bot behavior can differ.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">What's your approach to regression testing for a Salesforce major release? (3 per year)</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Salesforce's three major releases can impact customizations, LWC behavior, Flow functionality, and API compatibility. My pre-release regression strategy: six weeks before the release, I run the full automated Playwright regression suite against the pre-release sandbox (Salesforce offers pre-release orgs — request access at help.salesforce.com). I pay particular attention to "Retirement" notices in the release notes — if a feature we use is being retired, I prioritize those test cases immediately. I activate "Critical Updates" in sandbox early — these are changes that become mandatory at the release date; testing them early means the production release isn't a surprise. For LWC-heavy apps: I specifically run cross-browser regression since Lightning updates can change Shadow DOM behavior. I also verify API version compatibility — are our Playwright API test calls still valid with the new API version? I produce a release regression report documenting what was tested, what passed, what failed, and any required workarounds — this becomes the go/no-go input for the production release decision.
+      <div class="proof"><div class="proof-lbl">Your proof point</div>This proactive pre-release testing approach contributed to your zero critical defect record across multiple international client go-lives at Cognizant.</div>
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">Describe how you'd build a full test plan for a new Service Cloud implementation.</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">I structure Service Cloud test plans in six phases. Phase 1 — Configuration smoke test: verify all setup is complete — Omni-Channel routing configurations, queue memberships, entitlement processes, assignment rules, user profiles/permission sets. This is setup verification before business logic testing. Phase 2 — Unit testing automations: each assignment rule entry, each escalation rule trigger, each Flow path tested in isolation with targeted test records. Phase 3 — Integration testing: end-to-end case lifecycle — case creation triggers correct assignment rule, Omni-Channel pushes to correct agent, entitlement milestone clock starts, escalation fires on schedule, case closure triggers CSAT survey. Phase 4 — Persona UAT: test as Tier 1 agent, Tier 2 agent, supervisor, and customer (if Experience Cloud portal exists). Phase 5 — Volume testing: simulate peak concurrent case volume — does Omni-Channel routing hold up under load? Phase 6 — Regression suite: automate the 20 highest-risk scenarios in Playwright for ongoing CI regression. Every test case maps to a business requirement in the test plan — making UAT sign-off structured not ad-hoc.
+      <div class="proof"><div class="proof-lbl">Your proof point</div>At Cognizant you led zero-defect international Service Cloud go-lives using exactly this structured approach.</div>
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you test bulk case operations like mass reassignment or mass status update?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Bulk operations interact with Salesforce governor limits, triggers, and automation differently than single-record operations. For mass case reassignment: I test with small batches first (10 cases) to verify expected behavior — correct owner assignment, Omni-Channel work item routing update, notification emails sent. Then I scale to larger batches (100, 1000) to check governor limit issues (SOQL query limits in Flows/triggers, DML row limits). Specific checks: does the assignment rule re-evaluate on mass update? (Bulk updates can sometimes bypass certain automation.) Does the Omni-Channel work item correctly reroute when a case owner changes? For mass status updates (e.g., closing all cases in a queue): verify escalation rules stop evaluating for closed cases, entitlement milestones are marked complete rather than violated, and case close automation (CSAT trigger) fires for each closed case — not just the first. I also test partial failure rollback: if a mass update hits a validation rule on record 500 of 1000, does Salesforce roll back all 1000 or only the 500 that succeeded? (It rolls back all — atomic operation.)
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you manage Salesforce sandbox strategy for QA — which sandboxes, for what purpose?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Sandbox types matter significantly for QA. Developer sandbox: limited storage, no production data — good for unit testing individual configurations and automation. Developer Pro: more storage, still no production data. Partial Copy: random 10,000-record sample from production — good for realistic data testing and integration testing with representative data volumes. Full Copy: exact production copy — gold standard for UAT, release regression, and performance testing; expensive but essential for high-stakes implementations. My sandbox strategy: Developers work in Developer sandboxes. Integration testing happens in a shared Developer Pro with controlled test data. UAT happens in Partial Copy (realistic data without full production volume). Release regression and performance testing in Full Copy before major go-lives. For SFMC: I maintain dedicated test Data Extensions populated with internal email addresses only — never real customer data in any sandbox. At Horizontal Digital's migration project, I used a Partial Copy sandbox for volume testing before migrating 1M+ contacts to production.
+    </div></div>
+  </div>
+</section>
+
+<!-- =================== EXPERIENCE CLOUD ADVANCED =================== -->
+<section id="ec-adv" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(240,164,74,.15)">🌐</div>
+    <div><h2 class="sec-title">Experience Cloud — Advanced Q&A</h2>
+    <div class="sec-meta">8 advanced questions on Experience Cloud depth</div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you test Experience Cloud performance and Core Web Vitals?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Performance testing for Experience Cloud is important because customer-facing portals directly impact conversion and satisfaction — and Google factors Core Web Vitals into SEO ranking. My approach: I use Playwright's built-in performance APIs to measure page load timing. I run Lighthouse audits via Chrome DevTools Protocol in Playwright to capture Core Web Vitals — Largest Contentful Paint (LCP, target &lt;2.5s), First Input Delay (FID, target &lt;100ms), and Cumulative Layout Shift (CLS, target &lt;0.1). For Experience Cloud specifically, I test as unauthenticated guest user (most common for public sites) and authenticated external user — they have different caching behavior and data payloads. I look for: LWC components triggering multiple serial API calls during page load (waterfall delays), large unoptimized images (the #1 LCP killer), components loading synchronously when they should be lazy-loaded, and layout shift caused by content loading after initial render. I run performance tests in pre-release sandbox after every sprint to catch performance regressions before go-live, not just in final testing.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you test SSO integration with Experience Cloud?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">SSO for Experience Cloud (typically SAML 2.0 or OAuth 2.0) bridges the Identity Provider (Okta, Azure AD) and Salesforce as Service Provider. My SSO testing covers: Happy path — navigate to site, click Login, redirect to IdP login page, authenticate with valid credentials, redirect back as the correct user with correct profile. Identity assertion validation — the SAML assertion or OAuth token contains an email/username that maps to an existing Salesforce External User record; test what happens if the assertion email doesn't exist in Salesforce (should show a clear error, not a blank page or cryptic Salesforce error). Session timeout — when IdP session expires, user should be prompted to re-authenticate rather than encountering a cryptic error. Logout — verify logout terminates both Salesforce and IdP session (where configured), not just Salesforce. Error handling — test invalid credentials, locked IdP account, network failures during the redirect flow. I always test SSO in a non-admin browser session — admin sessions bypass SSO configurations and give false confidence.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you test accessibility (a11y) on an Experience Cloud site?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Accessibility testing for Experience Cloud matters both legally (WCAG 2.1 AA compliance) and for reach. Automated: I integrate @axe-core/playwright into the test suite — <code>await checkA11y(page)</code> after page load flags ARIA issues, color contrast failures, missing alt text, and form label problems. This runs in CI on every PR so accessibility regressions are caught immediately. Manual: Keyboard navigation — tab through all interactive elements in logical order, verify focus states have visible outlines, verify modal closes with ESC, verify skip-to-content link works. Screen reader testing: I test with NVDA (Windows) or VoiceOver (macOS/iOS) — LWC Shadow DOM can cause screen readers to miss dynamic content loaded by wire adapters. Specific Experience Cloud checks: form validation errors must be associated with their fields programmatically via aria-describedby (not just visually red), dynamic content updates (e.g., chat messages, case status changes) must announce via aria-live regions, image carousels need pause buttons. I document accessibility issues with WCAG success criteria references to help developers understand the fix required.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">Describe testing a headless Experience Cloud implementation.</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Headless Experience Cloud uses Salesforce as the backend only — serving content and data via APIs to a custom frontend (React, Next.js, Vue). This changes QA fundamentally. Instead of testing the Experience Builder UI, I test the Salesforce APIs the frontend consumes: CMS Delivery API (content), Salesforce Experience API (record data), Salesforce Identity API (authentication). API contract testing: I document expected API response schemas (field names, types, structures) and write Playwright API tests that validate these contracts. Any API change that breaks the frontend contract is a critical regression. Authentication flow: the custom frontend manages OAuth token lifecycle — I test token acquisition, silent refresh, and expiry handling. Content validation: test that CMS content updates in Salesforce appear in the API response within the expected cache TTL — if the TTL is 5 minutes, a content update should be visible via API within 5 minutes. Error state simulation: I use Playwright's page.route() to mock 401, 403, and 500 API responses and verify the frontend handles each gracefully with appropriate user messaging rather than blank pages or unhandled JS errors.
+    </div></div>
+  </div>
+</section>
+
+<!-- =================== PLAYWRIGHT ADVANCED =================== -->
+<section id="pw-adv" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(74,158,240,.15)">🎭</div>
+    <div><h2 class="sec-title">Playwright — Advanced Q&A</h2>
+    <div class="sec-meta">10 advanced Playwright questions for senior automation roles</div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you architect a Playwright test suite for a large enterprise application?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">For an enterprise app (50+ pages, multiple user roles, complex workflows) I follow a layered architecture. Directory structure: /tests (spec files by feature — auth/, cases/, routing/), /pages (POM classes mirroring app navigation), /fixtures (test.extend() definitions for shared setup), /helpers (utility functions — data generators, API clients, assertion helpers), /data (test data factories). Critical design decisions: role-based fixture sets — I create separate fixtures per user role (agentFixtures.ts, adminFixtures.ts, customerFixtures.ts), each pre-authenticated with the correct session. API-first for data setup: instead of navigating UI to create test records, I call APIs directly in beforeAll/beforeEach — dramatically faster and more reliable. Tiered test execution: I tag tests (@smoke, @regression, @critical) and CI runs different tag sets at different pipeline stages — @smoke blocks the PR merge, @regression runs post-merge. Shared reporter config: custom reporter maps test failures to Jira tickets and posts results to Slack. Database cleanup: after each test, API calls remove records created during that test to prevent data accumulation and cross-test contamination.
+      <div class="proof"><div class="proof-lbl">Connect to Sentinel</div>This architecture is exactly what Sentinel's Test Generation Agent outputs — compliant, layered, production-grade TypeScript Playwright suites.</div>
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you test multi-tab and multi-window scenarios in Playwright?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Playwright handles multi-tab testing elegantly — unlike Selenium and Cypress which struggle here. Multi-tab test: I listen for the new page event on the browser context simultaneously with triggering the click that opens the new tab:
+<pre>const [newPage] = await Promise.all([
+  context.waitForEvent('page'),
+  page.click('a[target="_blank"]')
+]);
+await expect(newPage).toHaveURL(/expected-url/);
+await expect(newPage.getByText('Expected Content')).toBeVisible();</pre>
+The key is Promise.all — if you click first then wait, you might miss the page event. For multi-window OAuth popup flows: same pattern — listen for popup, fill credentials in popup window, verify main window receives authenticated state. For Salesforce Service Console specifically, Lightning sub-tabs open within the console frame — I use Playwright's page management APIs to find and interact with the correct tab. Always verify cleanup: after the test, close any opened pages to prevent resource leaks in parallel test workers.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you implement visual regression testing with Playwright?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Playwright has built-in visual regression via <code>expect(page).toHaveScreenshot()</code>. On first run it creates baseline screenshots. Subsequent runs compare pixel-by-pixel and fail on differences above the threshold. My implementation strategy: I capture component-level screenshots (not full-page) for targeted regression — <code>expect(page.locator('.status-badge')).toHaveScreenshot('status-badge.png')</code>. This is more stable than full-page screenshots which break on any layout shift anywhere on the page. I configure a diff threshold for anti-aliasing: <code>toHaveScreenshot({maxDiffPixelRatio: 0.01})</code>. For dynamic content (timestamps, user-specific data), I mask those regions before comparison: <code>toHaveScreenshot({mask: [page.locator('.timestamp')]})</code>. Baseline management: screenshots are stored in git alongside tests. When intentional UI changes happen, developers regenerate baselines with <code>--update-snapshots</code> and commit updated screenshots. In CI, visual regression runs on Chromium only — WebKit and Firefox rendering differs enough to cause false failures when compared across browsers.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How does Sentinel's Test Generation Agent produce Playwright scripts? Walk through the technical process.</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Sentinel's Test Generation Agent operates in three phases. Phase 1 — Discovery: The UI Discovery Agent navigates the target application using Playwright, extracts all interactive elements (buttons, inputs, links, forms), captures their ARIA roles, labels, data attributes, and builds a structured element map. The API Discovery Agent intercepts network traffic via Playwright's request interception to identify API endpoints and infer schemas. Phase 2 — Scenario synthesis: The Reasoning layer takes the element map and API schema, applies test scenario templates (CRUD patterns, form validation patterns, navigation patterns), and generates natural-language test scenarios. The Coverage Engine checks against existing tests to prioritize uncovered scenarios. Phase 3 — Code generation: The Test Generation Agent sends the scenario description, element map, and POM template to the LLM with a structured prompt enforcing: TypeScript syntax, Playwright best practices (semantic locators, async/await), Page Object Model pattern, and proper assertion structure. Output is a complete runnable .spec.ts file. The 99.7% accuracy metric comes from the structured element map input — the LLM isn't guessing element names, it has actual DOM data as ground truth.
+      <div class="proof"><div class="proof-lbl">Be ready for live demo</div>Have sentient-qa-mind.lovable.app open — interviewers may ask to see it running.</div>
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you test file upload and download in Playwright?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">File upload: Playwright handles file inputs directly without workarounds. <code>await page.setInputFiles('#file-upload', '/path/to/test-file.pdf')</code> sets the file on a native file input. For drag-and-drop upload zones, I use Playwright's built-in <code>page.dispatchEvent()</code> with drag events. I test: valid file types (accepted formats), invalid file types (expect error message), file size limits (upload a file exceeding the max — expect rejection), multiple file selection if supported, and network failure mid-upload (use route interception to abort the upload request — verify partial upload is cleaned up). File download: I listen for the download event and save to a temporary path:
+<pre>const [download] = await Promise.all([
+  page.waitForEvent('download'),
+  page.click('#download-btn')
+]);
+const path = await download.path();
+expect(path).toBeTruthy();
+// For CSV/text: read content and assert
+const content = fs.readFileSync(path, 'utf8');
+expect(content).toContain('expected,header');</pre>
+In headless mode: downloads work but PDF rendering in browser doesn't — test the download succeeds, not the PDF content visually.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you measure test coverage and what metrics do you track?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">I track test coverage across three dimensions. Feature coverage: requirement-to-test traceability matrix — each user story has at least one linked automated test, visible in Jira via JUnit XML integration. Risk-based coverage: not all features need 100% automation. I apply risk weighting — core business flows (case creation, email send, checkout) have 100% automated coverage; low-risk admin screens may have only manual exploratory testing. Metrics I report to the team: (1) Test pass rate per sprint — target >95% passing in CI; (2) Flaky test rate — target <2% of executions result in inconsistent behavior; (3) Test execution time trend — should stay flat despite growing suite (sharding handles scale); (4) Defect escape rate — % of bugs found in production that had no covering automated test. I use Playwright's built-in HTML reporter for developers, JUnit XML for CI pipeline integration, and a weekly quality dashboard in Confluence showing all four metrics with trend lines. The defect escape rate is the most important metric — if it rises, automation coverage has critical gaps. It's the metric that gets executive attention because it directly connects QA investment to production incident reduction.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you handle authentication in Playwright — especially for Salesforce applications?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">For Salesforce applications, logging in through the UI on every test is slow (Salesforce login takes 5-10 seconds) and fragile. My approach: storageState reuse. I run a one-time setup script that logs in via Playwright and saves the browser session state to a JSON file: <code>await page.context().storageState({path: 'auth/salesforce-agent.json'})</code>. Then every test that needs an authenticated Salesforce agent loads that state instead of logging in: in playwright.config.ts <code>use: {storageState: 'auth/salesforce-agent.json'}</code>. For multiple user roles (agent, admin, customer portal user): I generate separate state files for each role in a global setup file that runs once before all tests. For Salesforce specifically: I also handle session expiry (Salesforce sessions expire after 2 hours by default in sandbox) by checking if the storageState file is stale and regenerating it. For Experience Cloud external users: separate storageState for each external user persona. The result: tests start already authenticated, saving 5-10 seconds per test — critical for large suites with hundreds of tests.
+    </div></div>
+  </div>
+</section>
+
+<!-- =================== CI/CD ADVANCED =================== -->
+<section id="ci-adv" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(240,107,107,.15)">🔁</div>
+    <div><h2 class="sec-title">CI/CD & DevOps — Advanced Q&A</h2>
+    <div class="sec-meta">8 advanced questions on CI/CD depth and DevOps culture</div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you manage environment-specific configuration across dev, staging, and production?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Environment-specific config management is critical — hardcoding staging URLs in test code is a common anti-pattern that causes production incidents. My approach: I use .env files per environment (.env.dev, .env.staging, .env.production) committed to the repo as templates with values redacted, populated by CI/CD secrets at runtime. In Playwright, I access environment variables via process.env.BASE_URL, process.env.API_KEY — never hardcoded strings. In GitHub Actions: I store sensitive values as GitHub Secrets (Settings → Secrets and variables → Actions) and inject them as env vars in the workflow: <code>env: BASE_URL: ${{ secrets.STAGING_URL }}</code>. Different job environments use different secret sets configured per GitHub Environment object. For Azure DevOps: I use Variable Groups linked to different environments — the staging pipeline references the "Staging" variable group, production references "Production." Key principle: the same test code runs identically in staging and production, with only environment variables changing. If I need to skip a test in a specific environment: I use Playwright's <code>test.skip(process.env.ENV === 'production', 'Destructive test')</code> pattern rather than separate test files.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">What is Infrastructure as Code and why does a QA engineer need to understand it?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Infrastructure as Code (IaC) means defining infrastructure (servers, databases, networks) using code files — Terraform, AWS CloudFormation, Docker Compose — rather than manual console configuration. Why QA needs it: in modern DevOps teams, QA engineers often need to spin up ephemeral test environments (a fresh environment per PR) rather than sharing a permanent staging environment that accumulates state. IaC enables this — a PR pipeline can provision a complete test environment using Terraform or Docker Compose, run tests against it, then destroy it when done. This eliminates "flaky tests caused by shared staging state" entirely. For my Playwright suite in CI, Docker Compose knowledge means I can define a docker-compose.yml that spins up the application and its dependencies for integration testing in a completely isolated environment. I don't need to be a DevOps expert — but knowing containers, environment variable injection, and service health checks makes me self-sufficient. In the context of Sentinel, I've written the deployment configuration for the platform itself — this IaC mindset directly applies to my automation platform work.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you handle secrets and credentials securely in your automation framework?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Credentials in test automation are a real security risk — test accounts sometimes have production data access. My security practices: Never hardcode credentials in code or committed config files. Never log credentials — CI pipeline logs can be searched; I verify that Playwright tests don't log full request headers containing auth tokens. Use least-privilege test accounts — test users have only the minimum permissions needed for their specific test scenarios, not admin access. Store secrets in CI secrets stores (GitHub Secrets, Azure Key Vault) and inject as environment variables at runtime only — never in the YAML file itself. For Salesforce API testing: I use a dedicated Connected App with a test-only profile, not the production integration app credentials. Rotate test credentials quarterly — I document rotation schedules in the team runbook. Session state reuse: I save browser storageState to a file for session reuse, but always add that file to .gitignore — never commit authenticated sessions to git. Any credential leak discovered in git history is treated as a critical incident: immediately revoke and rotate, then use git-filter-repo to clean the history (not just remove from latest commit).
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">How do you advocate for quality when the team is under pressure to ship fast?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">This is the most important non-technical skill in QA. My approach is data-driven advocacy, not emotional appeals. I maintain metrics that make the cost of skipping quality visible: average cost of a production bug (engineering hotfix time × developer rate × customer impact) vs cost of 30 minutes of QA. At Kafene, I quantified how our Azure DevOps pipeline integration reduced hotfix cycles — showing leadership that automation investment had direct ROI in reduced incident response time. In sprint planning: I flag high-risk stories early with a "QA Risk: High" tag and quantify what skipping means — "if we skip testing this, we're accepting the same risk class as the June incident that cost us X hours of engineering time." I propose tiered release approaches: release the low-risk parts now (fully tested), block the high-risk parts until tested properly — lets the team show progress without shipping unvalidated risk. The bottom line: I never just say "no" to shipping — I say "here's the risk of shipping now, here's what we need to reduce that risk, and here's the minimum viable test we can run in the time available." That positions QA as a partner in delivery, not a blocker.
+    </div></div>
+  </div>
+
+  <div class="qa" onclick="toggleQA(this)">
+    <div class="qa-q"><div class="qa-q-text">What is trunk-based development and how does it change your testing strategy?</div><div class="qa-arr">▼</div></div>
+    <div class="qa-a"><div class="qa-body">Trunk-Based Development (TBD) means all developers commit directly to the main branch or via very short-lived feature branches (1-2 days max). No long-lived feature branches. Feature Flags control which features are visible in production, decoupling deployment from release. How this changes testing: with TBD, CI must be extremely fast (developers commit multiple times per day) and the test suite must be highly reliable (flaky tests block the entire team, not just one developer's branch). Testing incomplete features: features in development are behind feature flags (disabled in production). I write tests for both flag states — flag OFF (old behavior) and ON (new behavior). This lets unfinished features live in the main branch without breaking production. Continuous testing culture shifts QA's role from gate-keeper to quality enabler — I focus on making the pipeline fast enough (sharding, parallel execution) and reliable enough (zero flaky tests tolerated) that the team can actually commit to trunk without friction. At Horizontal Digital this was the working model — my role was ensuring the CI pipeline quality gate was fast enough and reliable enough that it accelerated rather than blocked delivery.
+    </div></div>
+  </div>
+</section>
+
+<!-- =================== TRANSITION DEEP DIVE =================== -->
+<section id="transition-deep" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(90,191,138,.15)">🚀</div>
+    <div><h2 class="sec-title">QA → Automation & DevOps — Deep Dive</h2>
+    <div class="sec-meta">Career transition questions, mindset shifts, and positioning strategy</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'td','qa')">💬 Q&A</button>
+    <button class="tab-btn" onclick="switchTab(this,'td','shift')">🧠 Mindset Shift</button>
+    <button class="tab-btn" onclick="switchTab(this,'td','pitch')">🎯 Positioning</button>
+  </div>
+
+  <div id="td-qa" class="tab-content active">
+    <div class="qa" onclick="toggleQA(this)">
+      <div class="qa-q"><div class="qa-q-text">"How do you keep up with automation technology — the field changes fast."</div><div class="qa-arr">▼</div></div>
+      <div class="qa-a"><div class="qa-body">"I follow the Playwright changelog and release notes — every major release adds capabilities I evaluate for our suite. I'm active in the Playwright Discord community where the Microsoft team and senior practitioners discuss patterns. For the broader automation ecosystem I follow practitioners like Bas Dijkstra, the Ministry of Testing community, and the Salesforce developer blog for Salesforce-specific testing patterns. But honestly the biggest accelerator is building Sentinel — when you're implementing AI-assisted test generation, you're forced to deeply understand what makes automation work at a systems level. I don't just use frameworks — I build on top of them. That forces a depth of understanding that passive reading doesn't provide. When Playwright released Component Testing I evaluated it within a week for inclusion in Sentinel's generation patterns. When they added the built-in accessibility checker, I integrated it into our CI pipeline immediately. Staying current isn't a discipline problem for me — it's part of how I build."</div></div>
+    </div>
+    <div class="qa" onclick="toggleQA(this)">
+      <div class="qa-q"><div class="qa-q-text">"What do you do when automated tests find a critical bug right before a release?"</div><div class="qa-arr">▼</div></div>
+      <div class="qa-a"><div class="qa-body">"First, I validate it's a real defect — not a test environment issue or outdated test. I reproduce manually to confirm. Then I escalate immediately with a clear severity assessment: what's the business impact, what's the user impact, does it affect all users or a specific segment? I bring options to the conversation, not just the problem: (1) fix the bug now — estimated time from dev; (2) deploy with the bug and mitigate operationally — add monitoring, alert on the error, have a hotfix ready to deploy within 2 hours; (3) deploy with the affected feature disabled via feature flag; (4) delay the release. The decision isn't mine alone — it's a product, engineering, and QA conversation. My role is to provide clear data on the risk and make sure the business understands what accepting that risk means. At Horizontal Digital, my pre-go-live testing caught a Data Extension mapping issue that would have caused personalization to fail for the entire subscriber base. We delayed go-live by 4 hours to fix it. That 4-hour delay was far better than a mass email send with broken personalization to 500K subscribers."
+        <div class="proof"><div class="proof-lbl">Your proof point</div>The zero-defect go-live record came from exactly this kind of rigorous pre-release validation and willingness to delay when the risk was real.</div>
+      </div></div>
+    </div>
+    <div class="qa" onclick="toggleQA(this)">
+      <div class="qa-q"><div class="qa-q-text">"Describe your experience working in an Agile team."</div><div class="qa-arr">▼</div></div>
+      <div class="qa-a"><div class="qa-body">"All my recent roles have been Agile — two-week sprints with daily standups, sprint planning, retrospectives, and backlog refinement. My specific Agile QA practices: In sprint planning I flag story testability issues before the sprint starts — missing acceptance criteria, ambiguous requirements, or dependencies on other stories that need to complete first. I participate in Three Amigos sessions (dev + QA + BA) to align on test scenarios before anyone writes code — the most effective shift-left practice I've implemented. During the sprint I automate concurrently with development — I start writing Playwright tests as soon as story acceptance criteria are finalized, not after code is complete. In retrospectives I bring quality metrics — defect escape rate, automation coverage delta, flaky test count — to identify systemic quality issues. I've also championed Definition of Done criteria that explicitly include: feature has automated regression coverage, manual test cases documented in Jira, and zero P1/P2 bugs open. The Horizontal Digital sprint that achieved zero critical defects at go-live was the result of consistently applying this Agile QA approach across the entire project."</div></div>
+    </div>
+    <div class="qa" onclick="toggleQA(this)">
+      <div class="qa-q"><div class="qa-q-text">"What's your coding level — can you write automation from scratch?"</div><div class="qa-arr">▼</div></div>
+      <div class="qa-a"><div class="qa-body">"Yes — I write automation in TypeScript and JavaScript using Playwright with Page Object Model. I've built the Test Generation Agent in Sentinel that produces executable Playwright scripts — so I understand the framework architecture deeply enough to build a system on top of it, not just use it as a script runner. I'm fluent in SQL (extensively used for SFMC data validation at scale), comfortable with YAML for GitHub Actions and Azure DevOps pipeline configuration, and proficient in REST API testing using Playwright's request context. I'm not a full-stack application developer, and I'm transparent about that. But automation engineering doesn't require that — it requires knowing your testing framework inside-out, writing maintainable reusable code following design patterns like POM, and integrating reliably with CI/CD. All three I do at a production level, proven by actual implementations at Horizontal Digital and Kafene, and by Sentinel — which is a production-deployed system."</div></div>
+    </div>
+  </div>
+
+  <div id="td-shift" class="tab-content">
+    <div class="callout c-imp"><b>The core mindset shift:</b> From "I find bugs" to "I engineer quality into the delivery system." Both matter — but the second is what senior automation roles pay for.</div>
+    <div class="mg">
+      <div class="mc mc-bad">
+        <div class="mc-lbl">❌ Traditional QA (Being Left Behind)</div>
+        <ul class="mc-list">
+          <li>"I test after development is complete"</li>
+          <li>"I find bugs and file Jira tickets"</li>
+          <li>"Automation is someone else's job"</li>
+          <li>"I need detailed test cases before I can test"</li>
+          <li>"CI/CD is the DevOps team's responsibility"</li>
+          <li>"I'm the last checkpoint before release"</li>
+          <li>"My job is to say pass or fail"</li>
+        </ul>
+      </div>
+      <div class="mc mc-good">
+        <div class="mc-lbl">✅ Quality Engineer (Your Target)</div>
+        <ul class="mc-list">
+          <li>"I review requirements before code is written"</li>
+          <li>"I build systems that prevent bugs at scale"</li>
+          <li>"I own the automated regression suite in CI"</li>
+          <li>"I write acceptance criteria alongside requirements"</li>
+          <li>"I configure and maintain the CI quality gate"</li>
+          <li>"I'm embedded in every stage of delivery"</li>
+          <li>"My job is to enable fast, confident releases"</li>
+        </ul>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">The Language Shift — Say This, Not That</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Instead of saying...</th><th>Say this instead...</th><th>Why it matters</th></tr>
+      <tr><td>"I test the application"</td><td>"I validate product quality across the full delivery pipeline"</td><td>Signals ownership beyond manual testing</td></tr>
+      <tr><td>"I write test cases"</td><td>"I build automated test suites and CI quality gates"</td><td>Shows engineering, not just documentation</td></tr>
+      <tr><td>"I found a bug"</td><td>"I identified a risk before it reached production"</td><td>Business impact framing</td></tr>
+      <tr><td>"I'm a Senior QA"</td><td>"I'm a Quality Engineer / SDET"</td><td>Modern title = different role expectations</td></tr>
+      <tr><td>"I'm learning automation"</td><td>"I architect and maintain production automation systems"</td><td>Sentinel makes this 100% true — say it</td></tr>
+      <tr><td>"I use Playwright"</td><td>"I build automation frameworks using Playwright with POM, fixtures, and CI/CD integration"</td><td>Specificity signals depth</td></tr>
+    </table></div>
+  </div>
+
+  <div id="td-pitch" class="tab-content">
+    <div class="card">
+      <div class="card-title">🎯 Your 60-Second Elevator Pitch</div>
+      <div class="card-body" style="font-size:14px;line-height:1.85;background:var(--bg3);border-radius:var(--radius);padding:16px;margin-top:8px;font-style:italic">
+        "I'm a Quality Engineer with 9 years of deep Salesforce specialization — Marketing Cloud, Service Cloud, and Experience Cloud — transitioning from senior QA into full automation and DevOps engineering. What sets me apart: I'm not a QA who learned to write scripts. I architected and shipped Sentinel — a production AI platform that autonomously generates, executes, and self-heals Playwright test suites. I've integrated CI/CD quality gates at two companies using GitHub Actions and Azure DevOps. And my Salesforce domain expertise means my automation isn't generic — it covers the specific workflows where Salesforce systems actually break: DE migration integrity, Omni-Channel routing edge cases, API event deduplication. I bring the rare combination of knowing what to test deeply, and being able to build the systems that test it at scale."
+      </div>
+    </div>
+    <div class="g2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-title" style="color:var(--teal)">✅ Roles to Target (Priority Order)</div>
+        <div class="card-body">
+          <ol style="list-style:decimal;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text2)">
+            <li><strong>SDET — Salesforce specialist</strong> — Exact fit. Sentinel is the differentiator.</li>
+            <li><strong>Senior QA Automation Engineer</strong> — Direct progression, high demand</li>
+            <li><strong>Salesforce Test Architect</strong> — Premium niche, less competition</li>
+            <li><strong>Quality Engineer Lead</strong> — Leverages 9yr experience + automation depth</li>
+            <li><strong>Principal QA Engineer</strong> — Cross-squad leadership at Cognizant qualifies you</li>
+          </ol>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--amber)">📌 Company Types to Target</div>
+        <div class="card-body">
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text2)">
+            <li>🎯 <strong>Salesforce ISVs / AppExchange companies</strong> — deepest SF QA demand</li>
+            <li>🎯 <strong>Salesforce SI Partners</strong> (Accenture SF, Slalom, Capgemini) — your Cognizant pedigree resonates</li>
+            <li>🎯 <strong>Enterprise SaaS</strong> (Shopify, HubSpot, Zendesk) — SFMC/SC overlap</li>
+            <li>🎯 <strong>Fintech</strong> (Kafene connection) — Salesforce + automation premium</li>
+            <li>🎯 <strong>Series B–D startups</strong> — need senior QA who can also build automation infra</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== STAR STORIES BANK =================== -->
+<section id="star-bank" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(240,164,74,.15)">⭐</div>
+    <div><h2 class="sec-title">STAR Stories Bank</h2>
+    <div class="sec-meta">8 fully structured stories ready to adapt — practice each out loud in 90 seconds</div></div>
+  </div>
+  <div class="callout c-info"><b>STAR Format:</b> Situation → Task → Action → Result. Prepare these in 90-second verbal form. Practice out loud — timing matters as much as content.</div>
+
+  <div class="star">
+    <div class="star-lbl">⭐ Story 1 — Zero-Defect Go-Live (Horizontal Digital)</div>
+    <div class="star-parts">
+      <div class="star-part"><div class="sp-lbl">Situation</div><div class="sp-text">Horizontal Digital was migrating a major client from a legacy system to SFMC and Sales Cloud. Complex Data Extension restructuring, REST/SOAP API reconfiguration, and Journey Builder campaign migration — high risk across all layers with a hard launch deadline.</div></div>
+      <div class="star-part"><div class="sp-lbl">Task</div><div class="sp-text">QA lead responsible for designing and executing the full end-to-end test strategy: DE integrity validation, API integration testing, Journey Builder path coverage, and CI/CD integration for ongoing regression.</div></div>
+      <div class="star-part"><div class="sp-lbl">Action</div><div class="sp-text">Built SQL-based DE validation scripts, created full Journey test matrix including edge cases, integrated Playwright regression with GitHub Actions, used Jira Rovo to accelerate test case generation by ~40%. Ran pre-go-live smoke and full regression cycles.</div></div>
+      <div class="star-part"><div class="sp-lbl">Result</div><div class="sp-text">Zero post-go-live critical defects. Migration completed on schedule. First Journey Builder campaign launched within the same sprint as go-live. Client retained and extended engagement.</div></div>
+    </div>
+  </div>
+
+  <div class="star">
+    <div class="star-lbl">⭐ Story 2 — 1M+ Contact Validation at Cognizant</div>
+    <div class="star-parts">
+      <div class="star-part"><div class="sp-lbl">Situation</div><div class="sp-text">Global restaurant chain SFMC loyalty program. Data migration moving 1M+ contacts to a new DE structure ahead of an NFL loyalty campaign with significant revenue targets and tight launch deadline.</div></div>
+      <div class="star-part"><div class="sp-lbl">Task</div><div class="sp-text">Design and execute data integrity validation to ensure all 1M+ contacts were correctly migrated before the campaign's first production send — zero tolerance for subscriber key mismatches or compliance issues.</div></div>
+      <div class="star-part"><div class="sp-lbl">Action</div><div class="sp-text">Built SQL validation suite: COUNT comparison, duplicate SubscriberKey detection, NULL email check, subscriber status mapping, _Subscribers cross-reference, and AMPscript Lookup preview for a 500-contact spot-check sample.</div></div>
+      <div class="star-part"><div class="sp-lbl">Result</div><div class="sp-text">Found and resolved 3 data integrity issues pre-launch. Campaign launched cleanly — 25% engagement uplift and 30% sales increase during the campaign period attributed to clean data and correct segmentation.</div></div>
+    </div>
+  </div>
+
+  <div class="star">
+    <div class="star-lbl">⭐ Story 3 — Sentinel AI Platform (Solo Build)</div>
+    <div class="star-parts">
+      <div class="star-part"><div class="sp-lbl">Situation</div><div class="sp-text">Observed across multiple client projects that automation maintenance costs were eroding ROI — UI changes broke locators, tests became stale, and engineers spent more time fixing tests than writing them.</div></div>
+      <div class="star-part"><div class="sp-lbl">Task</div><div class="sp-text">Design and build a production-ready solution to the automation maintenance problem — not a prototype, a real platform with a go-to-market path.</div></div>
+      <div class="star-part"><div class="sp-lbl">Action</div><div class="sp-text">Architected Sentinel solo: 12-agent, 4-layer orchestration system. Built self-healing locator system (DOM analysis + locator strategy hierarchy). Test generation in &lt;2s at 99.7% accuracy. Launched 3-month industry feedback program with QA leaders.</div></div>
+      <div class="star-part"><div class="sp-lbl">Result</div><div class="sp-text">Production-deployed at sentient-qa-mind.lovable.app. Zero-code test generation. Self-healing eliminates most maintenance overhead. Pre-launch with enterprise validation in progress.</div></div>
+    </div>
+  </div>
+
+  <div class="star">
+    <div class="star-lbl">⭐ Story 4 — CI/CD Pipeline Integration (Kafene)</div>
+    <div class="star-parts">
+      <div class="star-part"><div class="sp-lbl">Situation</div><div class="sp-text">At Kafene, the team was experiencing repeated production hotfixes for issues that should have been caught earlier. No automated regression in the deployment pipeline — all testing was manual and post-deployment.</div></div>
+      <div class="star-part"><div class="sp-lbl">Task</div><div class="sp-text">Build and integrate an automated regression suite into Azure DevOps that would act as a reliable quality gate on every deployment.</div></div>
+      <div class="star-part"><div class="sp-lbl">Action</div><div class="sp-text">Designed Playwright test suite with POM architecture, integrated into Azure DevOps pipeline as a required check, configured HTML report publishing and artifact upload on failure, set up Jira integration for automatic ticket creation on pipeline failure.</div></div>
+      <div class="star-part"><div class="sp-lbl">Result</div><div class="sp-text">Hotfix cycles reduced noticeably. Team confidence in releases improved significantly. Regressions caught in pipeline before reaching production, not discovered by customers post-deployment.</div></div>
+    </div>
+  </div>
+
+  <div class="star">
+    <div class="star-lbl">⭐ Story 5 — Omni-Channel International Go-Live (Cognizant)</div>
+    <div class="star-parts">
+      <div class="star-part"><div class="sp-lbl">Situation</div><div class="sp-text">International client implementing Salesforce Service Cloud Omni-Channel for the first time across multiple regions including skills-based routing for French, German, and Spanish support teams.</div></div>
+      <div class="star-part"><div class="sp-lbl">Task</div><div class="sp-text">Design and execute a complete Omni-Channel testing strategy covering routing accuracy, capacity enforcement, skills-based matching, and cross-region language behavior.</div></div>
+      <div class="star-part"><div class="sp-lbl">Action</div><div class="sp-text">Built persona-based test matrix with agents for each skill/region combination. Created test cases for capacity limits, concurrent load, status transitions, and escalation paths. Tested in both sandbox and full-copy UAT environment.</div></div>
+      <div class="star-part"><div class="sp-lbl">Result</div><div class="sp-text">Zero-defect go-live. Routing operated correctly from day one across all regions. Agent satisfaction high due to no unexpected routing behavior in the first week of live operation.</div></div>
+    </div>
+  </div>
+
+  <div class="star">
+    <div class="star-lbl">⭐ Story 6 — AI-Assisted Test Generation Productivity</div>
+    <div class="star-parts">
+      <div class="star-part"><div class="sp-lbl">Situation</div><div class="sp-text">Large Salesforce migration project with 200+ user stories requiring test documentation. Sprint velocity was being blocked by manual test case writing taking 3+ days per sprint.</div></div>
+      <div class="star-part"><div class="sp-lbl">Task</div><div class="sp-text">Find a way to accelerate test case generation without sacrificing coverage depth or quality.</div></div>
+      <div class="star-part"><div class="sp-lbl">Action</div><div class="sp-text">Used Jira Rovo and GitHub Copilot to generate initial test case drafts from acceptance criteria. Created a review-and-refine process where I validated and enhanced AI-generated cases, added edge cases, and linked to automation scripts.</div></div>
+      <div class="star-part"><div class="sp-lbl">Result</div><div class="sp-text">~40% reduction in test documentation time. Sprint QA velocity increased from 15 to 22 stories/sprint without quality reduction — defect escape rate remained 0% for critical paths throughout the project.</div></div>
+    </div>
+  </div>
+
+  <div class="star">
+    <div class="star-lbl">⭐ Story 7 — Experience Cloud Recruitment App QA (Horizontal Digital)</div>
+    <div class="star-parts">
+      <div class="star-part"><div class="sp-lbl">Situation</div><div class="sp-text">Horizontal Digital built a custom Experience Cloud recruitment portal with complex permission-based access for three user personas: anonymous applicants, authenticated recruiters, and system administrators.</div></div>
+      <div class="star-part"><div class="sp-lbl">Task</div><div class="sp-text">Design and execute a testing strategy that validated access control security across all three personas, including guest user data exposure risks and Flow execution under user context.</div></div>
+      <div class="star-part"><div class="sp-lbl">Action</div><div class="sp-text">Built a persona-based test matrix. Tested every page as incognito guest, standard external user, and admin. Validated direct record URL access (not just list views). Tested all Flows as the external user specifically. Used DevTools Network tab to inspect API responses for data leaks.</div></div>
+      <div class="star-part"><div class="sp-lbl">Result</div><div class="sp-text">Identified and resolved 2 access control issues pre-launch: one Flow failing under user context due to missing object permissions, one guest user able to access unpublished job records via direct URL. Both resolved before go-live.</div></div>
+    </div>
+  </div>
+
+  <div class="star">
+    <div class="star-lbl">⭐ Story 8 — Greatest Professional Challenge (Sentinel Self-Healing)</div>
+    <div class="star-parts">
+      <div class="star-part"><div class="sp-lbl">Situation</div><div class="sp-text">Traditional automation maintenance is the #1 cost center in QA — UI changes break locators, and engineers spend more time fixing tests than writing new coverage. Existing self-healing tools on the market were too expensive or required cloud hosting of test code.</div></div>
+      <div class="star-part"><div class="sp-lbl">Task</div><div class="sp-text">Design and build a self-healing locator system that could detect locator failures, analyze updated DOM structure, and repair tests autonomously — without human intervention for routine UI changes.</div></div>
+      <div class="star-part"><div class="sp-lbl">Action</div><div class="sp-text">Built Sentinel's Maintenance Agent (locator failure detection) and Self-Healing Agent (DOM analysis using locator strategy hierarchy: ARIA → data attributes → structural proximity). Implemented confidence scoring — low-confidence repairs require human review. Took multiple iterations to achieve reliable enough accuracy for production use.</div></div>
+      <div class="star-part"><div class="sp-lbl">Result</div><div class="sp-text">System handles routine UI changes (class renames, element restructuring) autonomously. Human review only required for low-confidence cases (&lt;3% of repairs). This is the highest-value feature in Sentinel's industry feedback program — mentioned by every QA leader as their biggest maintenance pain point.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== SALARY NEGOTIATION =================== -->
+<section id="salary" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(224,109,192,.15)">💰</div>
+    <div><h2 class="sec-title">Salary Negotiation Scripts</h2>
+    <div class="sec-meta">Exact phrases for negotiating compensation confidently — role-play these before each interview</div></div>
+  </div>
+
+  <div class="callout c-imp"><b>Golden rule:</b> Always try to get them to state their range first. Your leverage is highest before you've named a number. The first person to name a number is at a disadvantage.</div>
+
+  <div class="card">
+    <div class="card-title">📍 When Asked "What's Your Expected Salary?" — Deflect First</div>
+    <div class="card-body">
+      <p style="margin-bottom:10px;font-style:italic;color:var(--text3)">Script Option A (most powerful):</p>
+      <p style="background:var(--bg3);padding:12px 14px;border-radius:var(--radius);font-size:13.5px;margin-bottom:12px">"I want to make sure we find a number that works for both of us based on the full scope of the role. Could you share what you've budgeted for this position? I'll let you know right away if we're in the same ballpark."</p>
+      <p style="margin-bottom:10px;font-style:italic;color:var(--text3)">Script Option B (if they push for your number):</p>
+      <p style="background:var(--bg3);padding:12px 14px;border-radius:var(--radius);font-size:13.5px;margin-bottom:12px">"Based on my research for this role level and your industry, I'm targeting [X–Y]. That said, I'm flexible based on the full package including equity, bonus, and benefits. Does that range work for this position?"</p>
+      <p style="margin-bottom:10px;font-style:italic;color:var(--text3)">Script Option C (for senior roles with strong leverage — Sentinel + Salesforce cert):</p>
+      <p style="background:var(--bg3);padding:12px 14px;border-radius:var(--radius);font-size:13.5px">"Given my combination of 9 years of Salesforce specialization, production automation platform experience, and Salesforce Admin certification — I'm targeting [X] as a base. I'm confident in the value I bring, and I'd love to understand what flexibility you have."</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📍 Justifying the Top of the Range</div>
+    <div class="card-body">
+      <p style="background:var(--bg3);padding:12px 14px;border-radius:var(--radius);font-size:13.5px">"I'm asking for [X] specifically because of three things: first, nine years of deep Salesforce specialization across SFMC, Service Cloud, and Experience Cloud — that combined depth is rare and most automation engineers don't have it. Second, Sentinel — I've built and shipped a production AI platform that demonstrates automation engineering at an architectural level, not just script writing. Third, measurable impact — zero post-go-live critical defects at Horizontal Digital, reduced hotfix cycles at Kafene, and 1M+ contact record validations at Cognizant. Those outcomes are what you're buying, and [X] reflects that track record."</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📍 When the Offer Comes In Below Target</div>
+    <div class="card-body">
+      <p style="background:var(--bg3);padding:12px 14px;border-radius:var(--radius);font-size:13.5px;margin-bottom:12px">"Thank you — I appreciate the offer and I'm genuinely excited about this role and the team. I was expecting something closer to [X] based on my research and the scope of what we've discussed. Is there flexibility to get closer to that? I want to make this work."</p>
+      <p style="margin-bottom:8px;font-size:13px;color:var(--text2)">If they say no room on base salary:</p>
+      <p style="background:var(--bg3);padding:12px 14px;border-radius:var(--radius);font-size:13.5px">"I understand. Could we look at other elements — signing bonus to bridge the gap in year one, additional PTO days, remote work flexibility, equity or options, or a 6-month performance review with a guaranteed raise if targets are met? I'm open to structuring this creatively."</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📍 Market Rate Reference Points — Verify Before Each Interview</div>
+    <div class="card-body">
+      <div class="table-wrap"><table style="margin:8px 0 12px">
+        <tr><th>Role Level</th><th>India (LPA)</th><th>Remote / International (USD)</th></tr>
+        <tr><td>Senior QA Automation — Salesforce specialist</td><td>₹18–28 LPA</td><td>$75k–$100k</td></tr>
+        <tr><td>SDET with Salesforce + Playwright + CI/CD</td><td>₹22–35 LPA</td><td>$85k–$115k</td></tr>
+        <tr><td>QA Lead / Principal QA</td><td>₹25–40 LPA</td><td>$95k–$130k</td></tr>
+        <tr><td>Test Architect — Salesforce niche</td><td>₹35–55 LPA</td><td>$110k–$150k</td></tr>
+        <tr><td>SDET with AI platform (Sentinel)</td><td>₹30–50 LPA</td><td>$100k–$140k</td></tr>
+      </table></div>
+      <p style="font-size:12px;color:var(--text3)">🔍 Verify current rates on: Glassdoor · LinkedIn Salary · AmbitionBox (India) · Levels.fyi · Blind — rates shift quarterly. Refresh before every interview cycle.</p>
+      <div class="callout c-tip" style="margin-top:12px;margin-bottom:0"><b>Your premium justifiers:</b> Sentinel (rare — most QA engineers can't point to a production AI platform they built), Salesforce Certified Admin (2025 — formal credential), cross-platform CI/CD experience (two companies, two platforms), and the 1M+ record validation scale. Use all four when justifying the top of any range.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📍 After the Negotiation — Closing Strong</div>
+    <div class="card-body">
+      <p style="background:var(--bg3);padding:12px 14px;border-radius:var(--radius);font-size:13.5px;margin-bottom:12px">"I appreciate your willingness to work on this. I want to be straightforward — I'm very excited about this opportunity and this team. If we can get to [X], I'm ready to commit and we can stop the search. Can we make that happen?"</p>
+      <p style="font-size:13px;color:var(--text2)">Always ask for the offer in writing before verbally accepting. Review total comp (base + bonus target + equity + benefits) not just base salary. Give yourself 24–48 hours to review — never accept on the spot, even if you've already decided yes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- =================== QUESTIONS TO ASK =================== -->
+<section id="ask-them" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(90,191,138,.15)">🤔</div>
+    <div><h2 class="sec-title">Questions to Ask the Interviewer</h2>
+    <div class="sec-meta">Smart questions signal engagement, research, and senior thinking — always ask at least 3</div></div>
+  </div>
+
+  <div class="callout c-tip"><b>Rule:</b> Never ask about salary/benefits/WFH in the first interview. Ask about the work, the team, and how success is measured. Questions are your chance to evaluate them as much as they're evaluating you.</div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'qt','role')">About the Role</button>
+    <button class="tab-btn" onclick="switchTab(this,'qt','tech')">Technical</button>
+    <button class="tab-btn" onclick="switchTab(this,'qt','culture')">Culture & Growth</button>
+    <button class="tab-btn" onclick="switchTab(this,'qt','close')">Closing Strong</button>
+  </div>
+
+  <div id="qt-role" class="tab-content active">
+    <div class="cheat-grid">
+      <div class="cc">
+        <div class="cc-title" style="color:var(--teal)">Strong Role Questions</div>
+        <ul class="cc-list">
+          <li><strong>"What does the current test automation coverage look like?"</strong><span class="annot">→ Shows you care about inheriting real work, not just a title</span></li>
+          <li><strong>"What's the biggest quality challenge the team faces right now?"</strong><span class="annot">→ Signals you want to solve real problems, not just maintain status quo</span></li>
+          <li><strong>"How do you measure QA success on this team?"</strong><span class="annot">→ Shows you think about outcomes, not just activities</span></li>
+          <li><strong>"What would make someone outstanding in this role in the first 90 days?"</strong><span class="annot">→ Signals ambition and desire to deliver value fast</span></li>
+          <li><strong>"Is the test suite running in CI today? If not, what's blocking that?"</strong><span class="annot">→ Shows CI/CD maturity awareness without being confrontational</span></li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:var(--teal)">Questions That Signal Seniority</div>
+        <ul class="cc-list">
+          <li><strong>"How does QA get involved in sprint planning — are you shift-left or is testing still post-development?"</strong></li>
+          <li><strong>"What's the ratio of manual to automated testing today, and what's the target?"</strong></li>
+          <li><strong>"How do you handle Salesforce's 3 major releases per year from a regression testing perspective?"</strong><span class="annot">→ Shows platform expertise interviewers don't expect</span></li>
+          <li><strong>"Is QA represented in architectural decisions, or primarily validating after design is finalized?"</strong></li>
+          <li><strong>"What does your Definition of Done include from a QA perspective?"</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="qt-tech" class="tab-content">
+    <div class="cheat-grid">
+      <div class="cc">
+        <div class="cc-title" style="color:var(--blue)">Technical Stack Questions</div>
+        <ul class="cc-list">
+          <li><strong>"What test automation frameworks are currently in use?"</strong><span class="annot">→ If Selenium: position Playwright migration as your first contribution opportunity</span></li>
+          <li><strong>"How do you manage test data — data factory or shared static data?"</strong><span class="annot">→ Shared static data is a red flag for flakiness; shows you understand the problem</span></li>
+          <li><strong>"Are tests running in parallel? Have you implemented sharding for faster CI feedback?"</strong></li>
+          <li><strong>"What does the Salesforce sandbox strategy look like — how many environments and what types?"</strong></li>
+          <li><strong>"How do you handle test environment isolation — do you have ephemeral environments per PR?"</strong></li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:var(--blue)">AI & Modern Practice Questions</div>
+        <ul class="cc-list">
+          <li><strong>"Is the team exploring AI-assisted testing tools — test generation, self-healing frameworks?"</strong><span class="annot">→ Natural Sentinel segue: "I've actually built one — would you like to see it?"</span></li>
+          <li><strong>"How do you handle test flakiness — what's the current flaky test rate and your mitigation strategy?"</strong></li>
+          <li><strong>"Do you have automated accessibility testing in the pipeline, or is that manual?"</strong></li>
+          <li><strong>"How does the team handle performance testing — integrated into CI or run separately pre-release?"</strong></li>
+          <li><strong>"What's your current defect escape rate to production, and how do you track it?"</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="qt-culture" class="tab-content">
+    <div class="cheat-grid">
+      <div class="cc">
+        <div class="cc-title" style="color:var(--green)">Team & Culture Questions</div>
+        <ul class="cc-list">
+          <li><strong>"What's the team structure — QA embedded in squads or centralized QA team?"</strong><span class="annot">→ Embedded is healthier; centralized can mean bottleneck role</span></li>
+          <li><strong>"How does the team handle disagreements between QA and dev about whether something is a bug?"</strong><span class="annot">→ Reveals psychological safety and process maturity</span></li>
+          <li><strong>"What does the career path look like for a quality engineer — is there a track toward architect or principal level?"</strong></li>
+          <li><strong>"How does the team approach learning — conference budget, training time, community involvement?"</strong></li>
+          <li><strong>"What's the on-call rotation like — is QA involved in production incident response?"</strong></li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:var(--green)">Red Flags to Listen For</div>
+        <ul class="cc-list">
+          <li>🚩 "QA tests at the end of the sprint" — no shift-left, you'll be a bottleneck</li>
+          <li>🚩 "We don't really have automated tests yet" — massive backlog, no existing infrastructure</li>
+          <li>🚩 "QA signs off, then dev deploys" — manual gate, not CI/CD integration</li>
+          <li>🚩 "The dev team handles their own testing" — no QA culture, you'll fight for every test</li>
+          <li>🚩 "We move fast and fix bugs in production" — no quality culture, chronic firefighting</li>
+          <li>✅ Green flags: "QA in sprint planning," "tests in CI," "shift-left," "Definition of Done includes automation"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="qt-close" class="tab-content">
+    <div class="cheat-grid">
+      <div class="cc">
+        <div class="cc-title" style="color:var(--amber)">Powerful Closing Questions</div>
+        <ul class="cc-list">
+          <li><strong>"Based on our conversation, do you have any concerns about my fit for this role that I can address?"</strong><span class="annot">→ Brave and direct — gives you a chance to overcome objections before they kill your candidacy</span></li>
+          <li><strong>"What do you personally enjoy most about working on this team?"</strong><span class="annot">→ Humanizes the conversation and gets authentic insight</span></li>
+          <li><strong>"What's the timeline for next steps — when should I expect to hear back?"</strong><span class="annot">→ Professional, shows you're organized</span></li>
+          <li><strong>"Is there anything in my background I haven't explained well that you'd like me to clarify?"</strong><span class="annot">→ Proactively handles hidden objections before they derail</span></li>
+          <li><strong>"Can you describe what the first 30-60-90 days would look like in this role?"</strong><span class="annot">→ Shows planning mindset and lets you evaluate realistic onboarding</span></li>
+        </ul>
+      </div>
+      <div class="cc">
+        <div class="cc-title" style="color:var(--amber)">After the Interview — Follow-Up</div>
+        <ul class="cc-list">
+          <li>Send a thank-you email within 2 hours — not a generic template</li>
+          <li>Reference a specific thing you discussed: "I especially appreciated your point about [X] — it reinforced why this role is compelling to me"</li>
+          <li>If you forgot to mention something important: "I also wanted to add that [X] from my Sentinel work is directly relevant to the challenge you mentioned..."</li>
+          <li>If they asked a question you didn't answer well: "I gave a partial answer to your question about [X] — here's a more complete response..."</li>
+          <li>End with: "I'm genuinely excited about this opportunity and would love to be part of what you're building."</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== FULL MINDSET BREAKDOWNS =================== -->
+<section id="mindsets" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(74,158,240,.15)">🧠</div>
+    <div><h2 class="sec-title">Full Mindset Breakdowns</h2>
+    <div class="sec-meta">Complete QA vs Dev mindset comparison across all technologies — use in interviews when asked "how do you work with developers?"</div></div>
+  </div>
+
+  <div class="callout c-info"><b>Interview tip:</b> When asked "how do you work with developers?" use this framework: "I understand their perspective — they're optimizing for making it work. I'm optimizing for making sure it works in every scenario a real user will encounter. That tension is healthy and productive."</div>
+
+  <div class="divider"></div>
+  <h3 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">SFMC: Dev Assumption vs QA Reality</h3>
+  <div class="table-wrap"><table style="margin-bottom:24px">
+    <tr><th>Scenario</th><th>Dev Assumption</th><th>QA Reality Check</th><th>How to Test</th></tr>
+    <tr><td>AMPscript personalization</td><td>"All contacts have a first name"</td><td>Legacy data has NULLs — AMPscript returns empty string, not NULL — email may show "Dear ,"</td><td><code>Empty(@FirstName)</code> check; test with NULL, empty, numeric, 100+ char names</td></tr>
+    <tr><td>Journey entry source</td><td>"The right contacts will enter"</td><td>Segment queries have edge cases; wrong contacts enter if criteria overlap</td><td>Validate exact segment size pre-entry; test boundary contacts that barely qualify vs barely don't</td></tr>
+    <tr><td>API Event journey entry</td><td>"The API call will fire the journey"</td><td>Contact must exist in All Subscribers; token must be valid; dedup must not block re-entry</td><td>Test with: valid contact, non-existent contact, expired token, second entry of same contact</td></tr>
+    <tr><td>Automation Studio SQL</td><td>"My query produces the right segment"</td><td>Overwrite vs Append mode matters; duplicate keys cause silent data issues</td><td>COUNT(*) before/after; GROUP BY HAVING COUNT>1 for dup check; test all three write modes</td></tr>
+    <tr><td>Email send to DE</td><td>"Everyone in the DE will get the email"</td><td>Bounced, Unsubscribed, and Held subscribers are excluded silently</td><td>Check _Sent data view — status column shows Sent/Excluded/Error for each subscriber</td></tr>
+  </table></div>
+
+  <h3 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">Service Cloud: Dev Assumption vs QA Reality</h3>
+  <div class="table-wrap"><table style="margin-bottom:24px">
+    <tr><th>Scenario</th><th>Dev Assumption</th><th>QA Reality Check</th><th>How to Test</th></tr>
+    <tr><td>Assignment rules</td><td>"Every case type has a matching rule"</td><td>Edge case cases match no rule — become unassigned (invisible to all queues)</td><td>Create case that matches no criteria; verify it lands in configured fallback queue</td></tr>
+    <tr><td>Omni-Channel routing</td><td>"Available agents receive work items"</td><td>Agent at capacity receives nothing even if status is Available</td><td>Set agent to max capacity; route a new case; verify it stays in queue</td></tr>
+    <tr><td>LWC component</td><td>"Component renders correctly"</td><td>FLS-restricted user causes JS errors or blank rendering — not graceful degradation</td><td>Test as user with restricted FLS; expect placeholder/message not console errors</td></tr>
+    <tr><td>Flow automation</td><td>"Flow works — I tested it as admin"</td><td>Flows run in user context by default — CRUD/FLS restrictions apply, causing failures</td><td>Run Flow as the actual end user profile; test record creation action with user's permissions</td></tr>
+    <tr><td>Entitlement milestones</td><td>"Milestones apply automatically"</td><td>Milestone process only applies if entitlement is linked to the case AND the case is created via a supported method</td><td>Create case via UI AND via API; verify milestone appears in both scenarios</td></tr>
+  </table></div>
+
+  <h3 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">Playwright Automation: Dev vs QA Mindset</h3>
+  <div class="table-wrap"><table style="margin-bottom:24px">
+    <tr><th>Scenario</th><th>Dev Writing Automation</th><th>QA Writing Automation</th><th>Impact</th></tr>
+    <tr><td>Locator choice</td><td><code>.btn-primary.submit-77f3a</code></td><td><code>getByRole('button',{name:'Submit'})</code></td><td>Dev locator breaks every CSS refactor; QA locator survives UI overhauls</td></tr>
+    <tr><td>Waiting strategy</td><td><code>page.waitForTimeout(3000)</code></td><td><code>page.waitForResponse(/api\/submit/)</code></td><td>Fixed delay is too fast sometimes, too slow always — waitForResponse is exact</td></tr>
+    <tr><td>Test scope</td><td>Tests the feature just built (happy path)</td><td>Tests regression of adjacent features that might have broken</td><td>Dev misses side effects; QA catches integration failures</td></tr>
+    <tr><td>Error states</td><td>Only tests successful response</td><td>Tests 500 error, 401, empty array, partial data response</td><td>Dev tests the sun shining; QA tests rain and storms</td></tr>
+    <tr><td>Test data</td><td>Uses shared staging records that accumulate state</td><td>Creates isolated data per test, cleans up in afterEach</td><td>Shared data causes cross-test contamination and false failures</td></tr>
+    <tr><td>Browser coverage</td><td>Chrome only (their dev browser)</td><td>Chromium + Firefox + WebKit in CI matrix</td><td>Safari (WebKit) frequently has different behavior — especially on mobile</td></tr>
+  </table></div>
+
+  <h3 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">Experience Cloud: Dev vs QA Security Mindset</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Scenario</th><th>Dev Assumption</th><th>QA Security Check</th><th>Test Method</th></tr>
+    <tr><td>Portal page visibility</td><td>"The page looks right in Experience Builder preview"</td><td>Builder preview personas ≠ real external user permissions — they simulate but don't enforce security</td><td>Log in as real external user in a separate browser; test same page</td></tr>
+    <tr><td>Record access</td><td>"Users can see their own records in list view"</td><td>Direct record URL access may expose records not shown in list view</td><td>Copy direct record URL from admin session; open in incognito as external user</td></tr>
+    <tr><td>Guest user</td><td>"The public pages are fine — they have no data"</td><td>API responses to guest requests may include object metadata or record IDs exploitable for enumeration</td><td>Open DevTools Network tab as incognito user; inspect all API responses for unexpected data</td></tr>
+    <tr><td>Flow on portal</td><td>"I tested the Flow and it works"</td><td>Flow tested as admin runs in system context; running as guest/external user uses user context with different permissions</td><td>Test Flow submission as the guest or external user profile specifically</td></tr>
+  </table></div>
+</section>
+
+<!-- =================== MODERN PROJECT PRACTICES =================== -->
+<section id="modern" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(124,106,247,.15)">🔮</div>
+    <div><h2 class="sec-title">What Modern Projects Actually Do</h2>
+    <div class="sec-meta">Current industry practices 2024–2026 — demonstrate you're ahead of the curve in interviews</div></div>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cc">
+      <div class="cc-title" style="color:#7c6af7">Modern SFMC Projects</div>
+      <ul class="cc-list">
+        <li><strong>Real-time journeys via API Events:</strong> No more batch-scheduled sends; customer actions trigger journeys within seconds</li>
+        <li><strong>Data Cloud (CDP) integration:</strong> Unified customer profiles from all touchpoints feed SFMC segmentation — replaces siloed DE-based segmentation</li>
+        <li><strong>Einstein STO as standard:</strong> AI send-time optimization is baseline expectation on enterprise campaigns, not a premium add-on</li>
+        <li><strong>WhatsApp & RCS messaging:</strong> Multi-channel journeys include conversational messaging alongside email/SMS</li>
+        <li><strong>CI/CD for SFMC config:</strong> SFMC API-based deployment pipelines — configuration changes deployed programmatically, not manually</li>
+        <li><strong>QA expectation:</strong> Test API-driven journeys, validate CDP segment sync accuracy, automate SFMC API regression in Playwright</li>
+      </ul>
+    </div>
+    <div class="cc">
+      <div class="cc-title" style="color:#2ec4a0">Modern Service Cloud Projects</div>
+      <ul class="cc-list">
+        <li><strong>Einstein Bots for deflection:</strong> AI-driven triage before human agents — 30–40% deflection rates on mature implementations</li>
+        <li><strong>Digital Engagement standard:</strong> WhatsApp, Apple Messages for Business, Facebook Messenger — all via Omni-Channel</li>
+        <li><strong>Einstein Case Classification:</strong> ML auto-routing and categorization — QA validates classification accuracy not just routing</li>
+        <li><strong>Flow replacing everything:</strong> Process Builder fully retired June 2026 — all automation in Record-Triggered Flows</li>
+        <li><strong>Dynamic Forms standard:</strong> Field-level visibility without page layout versions — more complex FLS testing required</li>
+        <li><strong>QA expectation:</strong> Test bot conversation flows, validate Flow behavior post-Process Builder migration, run Playwright automation against Service Console</li>
+      </ul>
+    </div>
+    <div class="cc">
+      <div class="cc-title" style="color:#f0a44a">Modern Experience Cloud Projects</div>
+      <ul class="cc-list">
+        <li><strong>LWR as the new standard:</strong> Lightning Web Runtime for all new Experience Cloud sites — Aura is legacy</li>
+        <li><strong>Headless architecture growing:</strong> Salesforce as backend API only; custom Next.js/React frontend — QA shifts to API contract testing</li>
+        <li><strong>Core Web Vitals compliance:</strong> Performance budgets are now formal requirements, not nice-to-have</li>
+        <li><strong>WCAG 2.1 AA mandatory:</strong> Many enterprise clients require accessibility compliance documentation</li>
+        <li><strong>Salesforce Identity (SSO):</strong> Okta and Azure AD integration is standard — pure Salesforce login is rare in enterprise</li>
+        <li><strong>QA expectation:</strong> Performance testing, accessibility automation, headless API contract testing, SSO flow validation</li>
+      </ul>
+    </div>
+    <div class="cc">
+      <div class="cc-title" style="color:#4a9ef0">Modern Playwright & Automation</div>
+      <ul class="cc-list">
+        <li><strong>Playwright as the de facto standard:</strong> Cypress and Selenium are being replaced — Playwright is the modern default for new projects</li>
+        <li><strong>Component testing (Playwright CT):</strong> Unit-level UI tests for individual components — bridges the gap between unit and E2E</li>
+        <li><strong>Visual regression built-in:</strong> <code>toHaveScreenshot()</code> in CI — no third-party tool needed</li>
+        <li><strong>Accessibility automation standard:</strong> @axe-core/playwright integrated into every enterprise PR pipeline</li>
+        <li><strong>AI-generated tests:</strong> Copilot, Sentinel, and similar tools generating Playwright scaffolding from requirements</li>
+        <li><strong>QA expectation:</strong> TypeScript proficiency, POM architecture, CI integration, sharding for speed, AI tooling awareness</li>
+      </ul>
+    </div>
+    <div class="cc">
+      <div class="cc-title" style="color:#f06b6b">Modern CI/CD & DevOps</div>
+      <ul class="cc-list">
+        <li><strong>Ephemeral test environments:</strong> Spin up a fresh environment per PR via Docker/Terraform; destroy after tests pass</li>
+        <li><strong>GitOps standard:</strong> Infrastructure defined in git (Terraform, Pulumi), applied automatically on merge</li>
+        <li><strong>Security scanning in CI:</strong> SAST (Snyk, Semgrep), SCA (dependency vulnerabilities) on every PR — QA understands these gates</li>
+        <li><strong>Feature flags everywhere:</strong> LaunchDarkly or similar — trunk-based development requires feature flag testing</li>
+        <li><strong>AI in pipelines:</strong> PR summary generation, automated risk scoring, intelligent test selection based on changed files</li>
+        <li><strong>QA expectation:</strong> Own the E2E quality gate, understand Docker basics, contribute to pipeline YAML config, interpret security scan results</li>
+      </ul>
+    </div>
+    <div class="cc">
+      <div class="cc-title" style="color:#5abf8a">AI in QA — Your Differentiator</div>
+      <ul class="cc-list">
+        <li><strong>Test generation:</strong> LLM-assisted Playwright script generation from requirements — Sentinel does this at 99.7% accuracy</li>
+        <li><strong>Self-healing locators:</strong> Auto-repair broken selectors when UI changes — Sentinel's self-healing agent</li>
+        <li><strong>Intelligent test selection:</strong> AI determines which tests to run based on changed code files — risk-based approach</li>
+        <li><strong>Failure classification:</strong> Auto-classify failures as flaky vs real bug vs environment issue — reduces noise</li>
+        <li><strong>Natural language authoring:</strong> Write test intent in plain English; AI converts to Playwright code</li>
+        <li><strong>Your positioning:</strong> "I don't just use AI tools for QA — I built one. Sentinel is my proof of this capability."</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="modern">
+    <div class="modern-lbl">The 2025–2026 Quality Engineer — What the Role Actually Requires Now</div>
+    <div class="modern-body">The market has shifted: "QA Engineer" who only does manual testing is increasingly rare in tech. Modern quality engineering requires: <b>automation fluency</b> (write production-grade code, not just record-and-playback scripts), <b>CI/CD integration</b> (own the quality gate in the pipeline, not just run tests after dev is done), <b>API testing</b> (understand REST/GraphQL, write API-level regression), <b>shift-left participation</b> (in sprint planning, three amigos, design reviews), and increasingly <b>AI tooling awareness</b> (use AI to generate, maintain, and analyze tests). You already have all five. That's the combination that commands premium compensation and senior-level roles. Your differentiator is that you also have deep Salesforce domain expertise — a rare combination that most automation engineers from non-Salesforce backgrounds simply don't have.</div>
+  </div>
+</section>
+
+<!-- =================== BUSINESS WORKFLOWS REFERENCE =================== -->
+<section id="business-wf" class="section">
+  <div class="sec-header">
+    <div class="sec-icon" style="background:rgba(46,196,160,.15)">⚙</div>
+    <div><h2 class="sec-title">Business Workflows Reference Guide</h2>
+    <div class="sec-meta">The most common business workflows across SFMC and Service Cloud — explained with QA test points at every step</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'bw','sfmc')">SFMC Workflows</button>
+    <button class="tab-btn" onclick="switchTab(this,'bw','sc')">Service Cloud Workflows</button>
+    <button class="tab-btn" onclick="switchTab(this,'bw','ec')">Experience Cloud Workflows</button>
+  </div>
+
+  <div id="bw-sfmc" class="tab-content active">
+
+    <div class="wf">
+      <div class="wf-title">🛒 Abandoned Cart Email Workflow — Most Common E-commerce SFMC Journey</div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">1</div><div><div class="wf-title2">Behavior Capture via Web SDK or API</div><div class="wf-desc">User adds item to cart and leaves without purchasing. E-commerce platform fires a POST to SFMC /interaction/v1/events with ContactKey, CartValue, ProductIDs. <span style="color:var(--teal)">QA test: verify API payload schema matches Journey API Event definition exactly; test with missing CartValue field (expect 400); test with ContactKey not in All Subscribers (should fail gracefully).</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">2</div><div><div class="wf-title2">Journey Entry + Deduplication Check</div><div class="wf-desc">Contact enters Journey. System checks re-entry settings. <span style="color:var(--teal)">QA test: fire same API Event twice for same ContactKey within re-entry window — second entry should be rejected (if No Re-entry). Test: contact who abandoned yesterday and today (does the most recent win?).</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">3</div><div><div class="wf-title2">Wait Activity (1 Hour) — Check for Purchase</div><div class="wf-desc">Journey waits. Meanwhile, another system checks if purchase was completed. <span style="color:var(--teal)">QA test in Test Mode: Wait is bypassed. In production sandbox: verify contact exits correctly if purchase completed during wait window. This is the most frequently missed test case.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">4</div><div><div class="wf-title2">Decision Split — Did They Purchase?</div><div class="wf-desc">Split evaluates CRM order status or custom DE flag. <span style="color:var(--teal)">QA test: contact who purchased goes to True path (exit journey); contact who didn't goes to False path (send email). Test NULL status — where does it go? Should go to False path.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">5</div><div><div class="wf-title2">Abandoned Cart Email with Product Personalization</div><div class="wf-desc">AMPscript Lookup pulls product name, image, price from Product DE using ProductID from event payload. <span style="color:var(--teal)">QA test: contact with valid ProductID (expect product rendered), invalid ProductID (expect fallback content, not broken email), multiple products in cart (expect all rendered or first N).</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">6</div><div><div class="wf-title2">Engagement Split + Follow-up</div><div class="wf-desc">Wait 24 hours. Engagement Split: Clicked → exit (conversion achieved); Not Opened → send SMS reminder; Bounced → update contact status to Bounced, exit. <span style="color:var(--teal)">QA test all three paths. Verify Bounced path updates _Subscribers status correctly and contact is excluded from future sends.</span></div></div></div>
+    </div>
+
+    <div class="wf">
+      <div class="wf-title">🏆 Loyalty Program Welcome & Tiered Upgrade Workflow</div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">1</div><div><div class="wf-title2">Signup via CloudPage Form</div><div class="wf-desc">Customer completes loyalty registration form on CloudPage. AMPscript InsertDE() writes record to Loyalty_Members DE and sets initial tier to Bronze. <span style="color:var(--teal)">QA test: duplicate email submission (should it update or reject?), missing required field (validation error must display), form submission creates exactly one DE record.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">2</div><div><div class="wf-title2">Welcome Email — Immediate Triggered Send</div><div class="wf-desc">Triggered Send fires via API post-form-submission. AMPscript personalizes with FirstName, Tier, PointsBalance (Lookup from Loyalty_Points DE). <span style="color:var(--teal)">QA test: FirstName = NULL (expect fallback like "Member"), PointsBalance = 0 (expect "0 points" not empty or error), long FirstName (display truncation).</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">3</div><div><div class="wf-title2">Nightly Points Sync — Automation Studio</div><div class="wf-desc">Scheduled Automation: SQL Query pulls latest points from CRM Synchronized DE → writes to Loyalty_Points DE (Overwrite mode). <span style="color:var(--teal)">QA test: row count after automation matches CRM export count. Test Overwrite mode — previous day's points should be gone. Test what happens if CRM Synchronized DE hasn't updated yet (automation should handle gracefully).</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">4</div><div><div class="wf-title2">Tier Upgrade Decision — Daily Journey Evaluation</div><div class="wf-desc">Entry source DE has SQL that selects members whose points crossed a tier threshold since yesterday. Decision Split routes: 1000–4999 points → Silver upgrade; 5000+ → Gold upgrade; below → no action. <span style="color:var(--teal)">QA test: contact at exactly 1000 points (boundary); contact at 999 (should not upgrade); contact who already upgraded (re-entry prevention). Your Cognizant NFL campaign used this exact pattern.</span></div></div></div>
+    </div>
+
+    <div class="wf">
+      <div class="wf-title">📦 Transactional Order Confirmation + Post-Purchase NPS Workflow</div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">1</div><div><div class="wf-title2">Order Placed → Triggered Send Fires</div><div class="wf-desc">E-commerce order management system calls SFMC Triggered Send API within seconds of order placement. Payload includes OrderNumber, OrderTotal, ItemList, EstimatedDelivery. <span style="color:var(--teal)">QA test: valid order (confirm email received within 2 min), API timeout handling, duplicate order number (idempotency — should not send twice).</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">2</div><div><div class="wf-title2">7-Day Wait → NPS Survey Journey</div><div class="wf-desc">7 days after order confirmation send, Journey Builder entry source (SQL query on _Sent data view filtered by email subject and send date + 7 days) enters customer into NPS survey journey. <span style="color:var(--teal)">QA test: customer who returned order should be excluded from NPS journey. Customer who placed multiple orders in 7 days should only get one NPS (deduplication). Customer who unsubscribed should not receive NPS.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(124,106,247,.2);color:#a89cf8">3</div><div><div class="wf-title2">NPS Score Capture → CRM Write-Back</div><div class="wf-desc">Customer clicks score 1–10 in email (link-based NPS). Click event captured in _Click data view. Automation Studio SQL reads _Click data and writes NPS score to CRM via Synchronized DE or API. <span style="color:var(--teal)">QA test: verify NPS score writes correctly to CRM Contact record. Test that link URL encoding correctly captures the score value. Test: customer clicks multiple NPS scores (only first should be recorded).</span></div></div></div>
+    </div>
+
+  </div>
+
+  <div id="bw-sc" class="tab-content">
+
+    <div class="wf">
+      <div class="wf-title">📞 Inbound Case Resolution — Full Lifecycle</div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(46,196,160,.2);color:#5dd4b8">1</div><div><div class="wf-title2">Case Creation (Web, Email, or Phone)</div><div class="wf-desc">Case created via web-to-case form, email-to-case, or agent phone logging. Auto-Response Rule fires acknowledgment email. <span style="color:var(--teal)">QA test: web-to-case with all required fields, missing required field (validation error), duplicate submission (is a new case created or existing found?). Verify auto-response email contains correct case number and personalization.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(46,196,160,.2);color:#5dd4b8">2</div><div><div class="wf-title2">Assignment Rule Evaluation</div><div class="wf-desc">Assignment Rule evaluates case fields (Product, Region, Priority, Case Type) and assigns to correct queue. First matching rule wins. <span style="color:var(--teal)">QA test: create case matching each rule entry criterion. Critical: create case matching NO criteria — verify fallback queue is assigned, not "unassigned" which disappears from all queue views.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(46,196,160,.2);color:#5dd4b8">3</div><div><div class="wf-title2">Omni-Channel Push to Agent</div><div class="wf-desc">Omni-Channel pushes case from queue to available agent matching routing config and skills. Agent sees case notification in Service Console widget. <span style="color:var(--teal)">QA test: agent at capacity (case should stay in queue), agent without required skill (case should not route to them), all agents offline (case waits in queue — no error thrown).</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(46,196,160,.2);color:#5dd4b8">4</div><div><div class="wf-title2">Entitlement Milestone Clock Starts</div><div class="wf-desc">If account has active entitlement, First Response milestone clock starts at case creation time. Warning fires at 80% of time elapsed. Violation fires at deadline. <span style="color:var(--teal)">QA test: shorten milestone to 5 min in sandbox. Verify Warning fires before deadline (email/field update). Verify Violation fires at missed deadline. Test: First Response logged by agent marks milestone Complete — verify violation doesn't fire after completion.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(46,196,160,.2);color:#5dd4b8">5</div><div><div class="wf-title2">Escalation (If Unresolved After SLA)</div><div class="wf-desc">Escalation Rule fires after configured time: changes Priority to High, reassigns to Tier 2 queue, notifies manager. <span style="color:var(--teal)">QA test: shorten escalation time in sandbox. Verify: case reassigned correctly, priority updated, notification email sent with correct case number and details. Test: case resolved before escalation time — escalation should NOT fire.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(46,196,160,.2);color:#5dd4b8">6</div><div><div class="wf-title2">Case Closure + CSAT Survey</div><div class="wf-desc">Agent closes case. Record-Triggered Flow fires: sends CSAT email via SFMC Triggered Send, marks Resolution milestone Complete, updates Account-level case count metric. <span style="color:var(--teal)">QA test: verify CSAT email sends to correct email address (Contact's email, not agent's). Verify customer cannot re-open case without explicit permission. Verify account metrics update correctly after closure.</span></div></div></div>
+    </div>
+
+    <div class="wf">
+      <div class="wf-title">💬 Live Chat → Case Escalation Workflow</div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(46,196,160,.2);color:#5dd4b8">1</div><div><div class="wf-title2">Einstein Bot — Initial Triage</div><div class="wf-desc">Visitor opens chat on website/portal. Einstein Bot greets and attempts to classify intent. Tries to resolve via Knowledge Article suggestion. <span style="color:var(--teal)">QA test: intent classification accuracy for all configured intents; bot response to unrecognized input; Knowledge Article returned is relevant to the issue described.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(46,196,160,.2);color:#5dd4b8">2</div><div><div class="wf-title2">Bot Escalates to Human Agent</div><div class="wf-desc">After N failed resolutions or explicit "speak to agent" request, bot transfers to human via Omni-Channel. Chat transcript passes to agent. <span style="color:var(--teal)">QA test: agent receives full chat transcript (not just the last message); extracted entities (order number, email) are pre-populated in case fields; transfer is instantaneous or within SLA.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(46,196,160,.2);color:#5dd4b8">3</div><div><div class="wf-title2">Agent Resolution + Case Creation</div><div class="wf-desc">Agent resolves chat issue. If case needed: agent creates case from chat record (pre-populated with transcript and customer details). <span style="color:var(--teal)">QA test: case creation from chat pre-populates Contact, Subject, Description correctly from chat data. Verify chat-to-case links are maintained for audit trail.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(46,196,160,.2);color:#5dd4b8">4</div><div><div class="wf-title2">Post-Chat Survey</div><div class="wf-desc">Chat session ends. Automated post-chat survey triggers (built-in Einstein Bot survey or SFMC Triggered Send). <span style="color:var(--teal)">QA test: survey sends only when chat had a human agent (not bot-only), survey correctly attributes to the right case and agent, survey score writes back to case record for reporting.</span></div></div></div>
+    </div>
+
+  </div>
+
+  <div id="bw-ec" class="tab-content">
+
+    <div class="wf">
+      <div class="wf-title">👤 Customer Self-Registration + Self-Service Portal Workflow</div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(240,164,74,.2);color:#f5c070">1</div><div><div class="wf-title2">Guest User Discovers Portal</div><div class="wf-desc">Anonymous visitor browses public-facing pages (Knowledge Articles, FAQs). Guest User Profile controls what they can see. <span style="color:var(--teal)">QA test in incognito: public pages accessible, Salesforce record data NOT visible, DevTools Network tab shows no customer data in API responses.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(240,164,74,.2);color:#f5c070">2</div><div><div class="wf-title2">Self-Registration Form</div><div class="wf-desc">Visitor clicks Register. Fills registration form. Flow creates Contact + External User record. User receives welcome email with login link. <span style="color:var(--teal)">QA test: duplicate email address (should update or reject with clear error), weak password (policy enforcement), registration with corporate email vs personal email (any different handling?), welcome email arrives within expected time.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(240,164,74,.2);color:#f5c070">3</div><div><div class="wf-title2">Login + Authenticated Session</div><div class="wf-desc">User logs in. Session established. Portal shows personalized content based on Account/Contact data. <span style="color:var(--teal)">QA test: valid credentials, invalid credentials (error message — don't expose whether email exists), account lockout after N attempts, session timeout (re-login required), remember me functionality if offered.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(240,164,74,.2);color:#f5c070">4</div><div><div class="wf-title2">Self-Service Case Creation</div><div class="wf-desc">Authenticated customer creates support case via portal. Case auto-populates Contact from logged-in user. OWD Private ensures customer can only see own cases. <span style="color:var(--teal)">QA test: Customer A cannot see Customer B's cases (test as both users in separate browsers simultaneously). Verify case created via portal appears in Service Console for agents. Internal-only Case Comments must NOT appear in portal.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(240,164,74,.2);color:#f5c070">5</div><div><div class="wf-title2">Agent Response Visible in Portal</div><div class="wf-desc">Internal agent responds via Service Console. Response appears as public Case Comment in customer's portal. <span style="color:var(--teal)">QA test: public comment appears in portal within expected time. Internal comment (marked Internal) does NOT appear. Case status updates (In Progress → Resolved) reflect in portal view. Notification email to customer triggered by public comment.</span></div></div></div>
+      <div class="wf-conn"></div>
+      <div class="wf-step"><div class="wf-num" style="background:rgba(240,164,74,.2);color:#f5c070">6</div><div><div class="wf-title2">Customer Self-Closes Case</div><div class="wf-desc">Customer marks case Resolved via portal. Flow fires: updates Case Status, triggers CSAT survey, updates account self-service metric. <span style="color:var(--teal)">QA test: customer can only close their OWN cases (try closing another customer's case via direct URL). Verify re-open is blocked or requires comment. CSAT survey sends correctly.</span></div></div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- =================== FOOTER + SCRIPTS =================== -->
+<div class="footer">
+  <p><strong>Aditya Rathore</strong> — Vol. 2 Deep Dive Cheat Book · Senior QA → Automation &amp; DevOps Engineer</p>
+  <p style="margin-top:6px">Sentinel Platform: <a href="https://sentient-qa-mind.lovable.app" target="_blank">sentient-qa-mind.lovable.app</a> &nbsp;·&nbsp; LinkedIn: <a href="https://linkedin.com/in/aditya-rathore1" target="_blank">aditya-rathore1</a></p>
+  <p style="margin-top:10px;color:var(--text3);font-size:12px">💡 Works fully offline · Use Ctrl+P → Save as PDF for printing · Open in any modern browser</p>
+</div>
+
+<script>
+// ===== TAB SWITCHING =====
+function switchTab(btn, section, tab) {
+  const parent = btn.closest('.section') || document;
+  parent.querySelectorAll('.tabs .tab-btn').forEach(b => b.classList.remove('active'));
+  parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const el = document.getElementById(section + '-' + tab);
+  if (el) el.classList.add('active');
+}
+
+// ===== Q&A TOGGLE =====
+function toggleQA(item) { item.classList.toggle('open'); }
+
+// ===== THEME TOGGLE =====
+function toggleTheme() {
+  const h = document.documentElement;
+  const cur = h.getAttribute('data-theme');
+  h.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+  document.querySelector('.theme-btn').textContent = cur === 'dark' ? '🌙 Toggle Dark Mode' : '☀ Toggle Light Mode';
+}
+
+// ===== READING PROGRESS =====
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docH = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('rp').style.width = (scrollTop / docH * 100) + '%';
+
+  // Active nav highlighting
+  const ids = ['cheatsheet','sfmc-adv','sc-adv','ec-adv','pw-adv','ci-adv','transition-deep','star-bank','salary','ask-them','mindsets','modern','business-wf'];
+  let current = ids[0];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top <= 120) current = id;
+  });
+  document.querySelectorAll('.sb-item').forEach(item => {
+    item.classList.remove('active');
+    if (item.getAttribute('href') === '#' + current) item.classList.add('active');
+  });
+});
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.qa.open').forEach(q => q.classList.remove('open'));
+  }
+});
+</script>
+</main>
+</div>
+</body>
+</html>
