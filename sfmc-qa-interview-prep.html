@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFMC QA Interview Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0c0f14;
+    --surface: #131820;
+    --surface2: #1a2030;
+    --border: #232d3f;
+    --accent: #00d4aa;
+    --accent2: #ff6b35;
+    --accent3: #7c6dfa;
+    --text: #e8edf5;
+    --muted: #6b7a93;
+    --tag-bg: #1a2030;
+    --must: #00d4aa;
+    --nice: #7c6dfa;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0c0f14 0%, #131820 50%, #0d1a14 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 24px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(0,212,170,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 30%;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(124,109,250,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .header-inner { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
+  .header-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.3);
+    color: var(--accent); border-radius: 20px; padding: 4px 14px;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 16px;
+  }
+  .header-badge::before { content: '◉'; font-size: 8px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 5vw, 48px);
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 15px; font-weight: 300; }
+
+  /* STATS ROW */
+  .stats-row {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    max-width: 900px; margin: 0 auto; padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted);
+  }
+  .stat-num { color: var(--accent); font-size: 20px; font-weight: 500; }
+  .stat-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* FILTERS */
+  .filters {
+    max-width: 900px; margin: 0 auto; padding: 20px 24px 0;
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .filter-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--muted); border-radius: 8px; padding: 7px 16px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer;
+    transition: all 0.2s; letter-spacing: 0.01em;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: rgba(0,212,170,0.12); border-color: var(--accent); color: var(--accent); }
+  .filter-btn.cat-must.active { background: rgba(0,212,170,0.12); border-color: var(--must); color: var(--must); }
+  .filter-btn.cat-nice.active { background: rgba(124,109,250,0.12); border-color: var(--nice); color: var(--nice); }
+
+  /* MAIN */
+  main { max-width: 900px; margin: 0 auto; padding: 24px; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+  .card:hover { border-color: #2d3a50; box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+  .card.open { border-color: rgba(0,212,170,0.25); }
+  .card.open.nice-have { border-color: rgba(124,109,250,0.25); }
+
+  .card-header {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 18px 20px; cursor: pointer;
+    user-select: none;
+  }
+  .q-num {
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: var(--muted); min-width: 28px; padding-top: 3px;
+    letter-spacing: 0.05em;
+  }
+  .q-text { flex: 1; font-size: 15px; font-weight: 500; line-height: 1.45; color: var(--text); }
+  .chevron {
+    width: 20px; height: 20px; flex-shrink: 0;
+    border: 1px solid var(--border); border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); transition: transform 0.25s, background 0.2s, border-color 0.2s;
+    font-size: 10px; margin-top: 2px;
+  }
+  .card.open .chevron {
+    transform: rotate(180deg);
+    background: rgba(0,212,170,0.1); border-color: rgba(0,212,170,0.4); color: var(--accent);
+  }
+  .card.open.nice-have .chevron {
+    background: rgba(124,109,250,0.1); border-color: rgba(124,109,250,0.4); color: var(--nice);
+  }
+
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .tag {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 4px;
+    border: 1px solid transparent;
+  }
+  .tag-must { background: rgba(0,212,170,0.08); border-color: rgba(0,212,170,0.2); color: var(--must); }
+  .tag-nice { background: rgba(124,109,250,0.08); border-color: rgba(124,109,250,0.2); color: var(--nice); }
+  .tag-topic { background: rgba(255,255,255,0.04); border-color: var(--border); color: var(--muted); }
+
+  /* ANSWER */
+  .answer {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .card.open .answer { max-height: 2000px; }
+
+  .answer-inner { padding: 0 20px 20px 62px; }
+  .answer-section { margin-bottom: 14px; }
+  .answer-label {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--accent); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .nice-have .answer-label { color: var(--nice); }
+  .answer-text { font-size: 14px; color: #b0bac9; line-height: 1.7; font-weight: 300; }
+  .answer-text strong { color: var(--text); font-weight: 500; }
+
+  code {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    background: #0d1117; border: 1px solid var(--border);
+    padding: 10px 14px; border-radius: 8px; display: block;
+    margin: 8px 0; color: #7ec8a0; line-height: 1.6;
+    overflow-x: auto; white-space: pre;
+  }
+
+  .tip-box {
+    background: rgba(255,107,53,0.07); border: 1px solid rgba(255,107,53,0.2);
+    border-radius: 8px; padding: 10px 14px; margin-top: 10px;
+  }
+  .tip-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .tip-text { font-size: 13px; color: #c4a090; line-height: 1.6; }
+
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+  /* PROGRESS */
+  .progress-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 10px 24px; display: flex; align-items: center; gap: 14px;
+    z-index: 100;
+  }
+  .progress-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .progress-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 2px; transition: width 0.4s; }
+  .progress-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); white-space: nowrap; }
+
+  .no-results {
+    text-align: center; padding: 60px 20px;
+    color: var(--muted); font-family: 'DM Mono', monospace; font-size: 13px;
+  }
+
+  .section-group { margin-bottom: 32px; }
+
+  @media (max-width: 600px) {
+    .answer-inner { padding-left: 20px; }
+    .stats-row { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-badge">Interview Prep Kit</div>
+    <h1>Senior SFMC QA <em>Engineer</em></h1>
+    <p class="subtitle">Salesforce Marketing Cloud · Asia Pacific · Mid-2026 Onboarding</p>
+  </div>
+</header>
+
+<div class="stats-row">
+  <div class="stat"><span class="stat-num" id="totalQ">0</span><span>Questions</span></div>
+  <div class="stat">
+    <span class="stat-dot" style="background:var(--must)"></span>
+    <span class="stat-num" id="mustQ">0</span><span>Must-Have</span>
+  </div>
+  <div class="stat">
+    <span class="stat-dot" style="background:var(--nice)"></span>
+    <span class="stat-num" id="niceQ">0</span><span>Nice-to-Have</span>
+  </div>
+  <div class="stat"><span class="stat-num" id="openQ">0</span><span>Reviewed</span></div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" data-filter="all">All Questions</button>
+  <button class="filter-btn cat-must" data-filter="must">✦ Must-Have</button>
+  <button class="filter-btn cat-nice" data-filter="nice">◈ Nice-to-Have</button>
+  <button class="filter-btn" data-filter="sfmc">SFMC Core</button>
+  <button class="filter-btn" data-filter="api">API & Data</button>
+  <button class="filter-btn" data-filter="sql">SQL</button>
+  <button class="filter-btn" data-filter="agile">Agile / Process</button>
+  <button class="filter-btn" data-filter="behavioral">Behavioural</button>
+</div>
+
+<main id="main">
+</main>
+
+<div class="progress-bar">
+  <span class="progress-label">Review progress</span>
+  <div class="progress-track"><div class="progress-fill" id="pFill" style="width:0%"></div></div>
+  <span class="progress-count" id="pCount">0 / 0</span>
+</div>
+
+<script>
+const QS = [
+  // ── SFMC CORE ──
+  {
+    cat: "must", topics: ["sfmc","behavioral"],
+    q: "Walk me through how you would design and execute an end-to-end test plan for a new Journey Builder campaign.",
+    star: "Situation — Task — Action — Result",
+    answer: `An SFMC journey typically touches audience entry (Data Extension or Salesforce Data), decision splits, wait periods, email send activities, and exit criteria. I break the test plan into these layers:
+
+<strong>1. Entry Source Validation</strong> — confirm contacts enter the journey from the correct Data Extension, with valid/required fields populated. I deliberately inject edge cases: duplicate contacts, missing email addresses, contacts who should be suppressed.
+
+<strong>2. Decision Split Testing</strong> — for each split condition (e.g. "Opened email = True"), I create contacts in each branch and trace their path through AMPscript or SQL validation post-send.
+
+<strong>3. Email Content & Personalisation</strong> — validate subject lines, dynamic content blocks, AMPscript rendering (especially null-handling), UTM parameters, and unsubscribe links.
+
+<strong>4. Timing & Waits</strong> — test wait-until conditions, time-zone offsets, and that contacts are not duplicated in subsequent sends.
+
+<strong>5. Exit & Re-entry Logic</strong> — verify contacts exit on the correct event and that re-entry rules are enforced.
+
+<strong>6. Integration Points</strong> — if the journey writes back to Sales Cloud or calls an external API, I validate payloads in Postman / Bruno and confirm the CRM record is updated correctly.
+
+I document every test case in a matrix linked to the JIRA story and execute in a Sandbox before promoting to Production.`,
+    tip: "Mention that you always test the 'unhappy path' — what happens when the API is down, the Data Extension is empty, or a field value is NULL."
+  },
+  {
+    cat: "must", topics: ["sfmc","api"],
+    q: "How do you validate data accuracy and integrity when testing SFMC integrations with external systems (e.g. SAP, AWS)?",
+    star: null,
+    answer: `I approach integration testing in three layers:
+
+<strong>Schema Validation</strong> — confirm field names, data types, and lengths match the agreed interface contract. I compare the source system payload against the SFMC Data Extension schema.
+
+<strong>Data Mapping Verification</strong> — use SQL in SFMC's Query Activity to pull a sample of records and reconcile them against the source using an agreed key (e.g. Customer ID). Any mismatch is raised immediately.
+
+<strong>Downstream Impact Checks</strong> — after data flows into SFMC, I verify:
+• The correct audience segments are produced
+• Personalisation tokens resolve correctly in email previews
+• Any write-back to SAP/CRM reflects the expected values
+
+For API-driven integrations I use <strong>Postman / Bruno</strong> to fire test requests, inspect response codes (200, 400, 500), and validate JSON payloads. I also check idempotency — re-sending the same payload should not create duplicate records.
+
+I log all findings in JIRA with reproduction steps, expected vs actual payload, and business impact.`,
+    tip: "Be ready to discuss how you handle test data — especially PII. In APAC, privacy regulations (PDPA, Privacy Act) matter."
+  },
+  {
+    cat: "must", topics: ["sql","sfmc"],
+    q: "Give me an example of a SQL query you wrote to validate campaign data or audience lists in SFMC.",
+    star: null,
+    answer: `A common validation I perform is confirming that a re-engagement audience does not contain contacts who have already converted in the current period.
+
+In SFMC's Query Activity (which uses T-SQL syntax):`,
+    code: `-- Identify contacts in the re-engagement DE
+-- who already made a purchase in the last 30 days
+SELECT
+    r.EmailAddress,
+    r.ContactKey,
+    p.PurchaseDate,
+    p.OrderID
+FROM [ReEngagement_Audience] r
+INNER JOIN [Purchase_DataExtension] p
+    ON r.ContactKey = p.ContactKey
+WHERE
+    p.PurchaseDate >= DATEADD(DAY, -30, GETDATE())
+    AND r.EmailAddress IS NOT NULL
+ORDER BY p.PurchaseDate DESC`,
+    answerPost: `I would surface this list to the campaign owner — these contacts should be excluded from the journey or moved to a "Thank You" path instead.
+
+I also write validation queries to check:
+• Duplicate EmailAddresses in an audience DE
+• NULL values in mandatory personalisation fields
+• Subscription status mismatches vs the All Subscribers list`,
+    tip: "SFMC Query Activities are T-SQL. Practice DATEADD, DATEDIFF, ISNULL, and JOIN patterns. Know the difference between a Data Extension and the All Subscribers list."
+  },
+  {
+    cat: "must", topics: ["sfmc","api"],
+    q: "How do you test SFMC Automations, and what are the most common failure points you look for?",
+    star: null,
+    answer: `Automations in SFMC run sequences of activities: SQL Queries, File Imports, Sends, and Data Extracts. My test approach:
+
+<strong>Step-by-step trace</strong> — I enable the automation in a Sandbox with a small test dataset and verify each activity completes with the expected status (Complete, not Error/Skipped).
+
+<strong>Common failure points I watch for:</strong>
+• <strong>File Import</strong> — column delimiter mismatch, wrong encoding (UTF-8 vs UTF-16), header row present/absent, file not arriving in the expected SFTP path or S3 bucket.
+• <strong>SQL Query Activity</strong> — query timeout on large datasets, incorrect Overwrite vs Append setting causing data loss or duplication.
+• <strong>Send Activity</strong> — send classification wrong (transactional vs commercial), suppression lists not applied.
+• <strong>Schedule drift</strong> — if the automation depends on a file being ready at a specific time, I test what happens when the file is late.
+• <strong>Error notification</strong> — verify the automation error email/alert fires to the right team.
+
+I document the expected file spec, record counts pre/post, and automation completion timestamps in my test evidence.`,
+    tip: "Interviewers love candidates who proactively test error paths — what happens when step 2 fails? Does step 3 still run?"
+  },
+  {
+    cat: "must", topics: ["api","sfmc"],
+    q: "Describe your approach to API testing in a Marketing Cloud context. What tools do you use and what do you validate?",
+    star: null,
+    answer: `I use <strong>Postman</strong> or <strong>Bruno</strong> for SFMC REST and SOAP API testing.
+
+<strong>Authentication</strong> — first I validate the OAuth 2.0 token flow: POST to /v2/token with client_id, client_secret, and scope, then confirm the access token is correctly passed in the Authorization header for subsequent calls.
+
+<strong>Key API surfaces I test:</strong>
+• <strong>Contacts API</strong> (/contacts/v1/) — upsert a contact, verify the record appears in the correct Data Extension and has the correct attribute values.
+• <strong>Transactional Messaging API</strong> — trigger a single send, validate the response body includes a requestId, and confirm delivery in Tracking.
+• <strong>Data Extension API</strong> — POST/GET/DELETE rows, validate field-level data types and length constraints.
+• <strong>Journey API</strong> (/interaction/v1/events) — fire an entry event with a test contact and confirm they enter the journey.
+
+<strong>What I validate:</strong> HTTP status codes, response schema (required fields, correct data types), error messages for invalid payloads, rate limiting behaviour, and idempotency.
+
+I save test collections in Postman/Bruno with environment variables for Sandbox vs Production endpoints so the suite can be re-run quickly for regression.`,
+    tip: "Know the difference between SFMC REST API and SOAP API. REST is modern (Marketing APIs, Journey), SOAP is legacy (Email Studio, Subscriber management). Both appear in real projects."
+  },
+  {
+    cat: "must", topics: ["agile","behavioral"],
+    q: "How do you structure a test strategy and ensure release readiness in an Agile / sprint-based delivery?",
+    star: null,
+    answer: `I integrate QA into every stage of the sprint rather than treating it as a phase at the end.
+
+<strong>Sprint Planning</strong> — I review user stories for testability, raise ambiguous acceptance criteria, and estimate QA effort alongside dev. I ensure Definition of Done includes passing test cases.
+
+<strong>During Sprint</strong> — I write test cases from acceptance criteria (functional, edge, negative). As dev completes stories, I test iteratively rather than waiting for a big-bang UAT.
+
+<strong>Regression</strong> — I maintain a regression suite covering core campaign flows, API integrations, and data validations. Before each release I run the full suite and document pass/fail.
+
+<strong>Release Readiness Gate</strong> — I produce a Test Summary Report covering: scope tested, pass/fail counts, open defects (with severity/priority), known risks, and a go/no-go recommendation.
+
+<strong>UAT Support</strong> — I prepare UAT scripts for business stakeholders, facilitate sessions, and translate any issues raised into JIRA defects with clear business-impact statements.
+
+I track all defects in JIRA with environment, steps to reproduce, expected vs actual, and screenshots/logs attached.`,
+    tip: "Mention that you proactively communicate risk — if a critical defect is found on Day 8 of a 10-day sprint, the team needs to know immediately so they can make an informed go/no-go decision."
+  },
+  {
+    cat: "must", topics: ["behavioral","agile"],
+    q: "Tell me about a time you caught a critical defect late in a release cycle. How did you handle it and what was the outcome?",
+    star: "Use STAR format",
+    answer: `<strong>Situation:</strong> Two days before a major re-engagement campaign was scheduled to send to 500,000 contacts, I discovered during final regression that the suppression list SQL query had an incorrect JOIN condition — it was excluding active customers instead of lapsed ones.
+
+<strong>Task:</strong> The campaign team and the business were expecting the send to proceed. I needed to assess impact, communicate clearly, and drive resolution quickly.
+
+<strong>Action:</strong> I immediately documented the defect in JIRA with a severity-1 tag, quantified the impact (estimated ~120,000 contacts incorrectly classified), and called an urgent war-room with the developer, campaign manager, and the data team lead. I shared my SQL validation evidence. We patched the query, and I re-ran the full data validation suite within 3 hours. I then prepared a short business-impact summary for the stakeholders explaining what the error would have caused, what was fixed, and the confidence level after re-testing.
+
+<strong>Result:</strong> The send was delayed by one day — a controlled, agreed outcome. The campaign launched successfully with the correct audience. I used the incident to advocate for an additional SQL peer-review step in our query promotion process, which was adopted.`,
+    tip: "They are looking for ownership, calm under pressure, clear communication, and lessons learned — not perfection. Don't say 'we' for everything; own your specific actions."
+  },
+  {
+    cat: "must", topics: ["behavioral"],
+    q: "How do you communicate a complex technical defect to a non-technical business stakeholder?",
+    star: null,
+    answer: `I translate the technical defect into <strong>business language and business impact</strong>.
+
+For example, instead of saying: "The SQL JOIN in the Query Activity is using an INNER JOIN instead of a LEFT OUTER JOIN, causing the suppression logic to fail" — I would say:
+
+<em>"The campaign is currently set up to accidentally send emails to customers who should not be receiving them — specifically, active customers who purchased in the last 30 days. If we send now, approximately 40,000 customers would receive a 'We miss you' email, which could confuse them and damage trust. We've identified the fix and it will take 3 hours to apply and re-test. My recommendation is to delay the send by one day."</em>
+
+I structure my communication around three things:
+1. <strong>What went wrong</strong> (in plain language)
+2. <strong>What the business impact would be</strong> (quantified where possible)
+3. <strong>What the options and recommendation are</strong>
+
+I also avoid blame — I focus on the issue and the path forward.`,
+    tip: "This is one of the most important skills for a Senior QA. Emphasise that you've done this before and that you default to written communication (email/Confluence) for a clear audit trail."
+  },
+  // ── API & DATA ──
+  {
+    cat: "must", topics: ["api","sfmc"],
+    q: "How would you validate that data flowing from SFMC into a downstream CRM (e.g. Salesforce Sales Cloud) is accurate?",
+    star: null,
+    answer: `I use a three-point reconciliation approach:
+
+<strong>1. Source count check</strong> — query the SFMC Data Extension or Tracking table to get the expected record count and key field values.
+
+<strong>2. Destination check</strong> — query the Sales Cloud object (e.g. CampaignMember, Contact, Custom Object) for the same records using the shared key (ContactKey / Salesforce ID).
+
+<strong>3. Field-level comparison</strong> — for a sample of records (I aim for at least 5% of volume or 100 records, whichever is larger), I compare field by field: strings, dates, boolean flags, numeric values.
+
+I also validate:
+• Records that should NOT have synced (suppressed contacts, opted-out) are absent
+• Timestamps are correctly converted to the target timezone
+• No duplicate records were created by the sync
+
+For the SFMC → Sales Cloud direction, I use the Marketing Cloud Connector (or REST API if custom) and validate the Connected App integration via logs in Setup → Login History and the MC Connector activity log.`,
+    tip: "If they ask about Salesforce Data Cloud (CDP), pivot to: validating segment membership, identity resolution outputs, and activation payloads."
+  },
+  {
+    cat: "must", topics: ["sfmc","agile"],
+    q: "What is your approach to regression testing for a Salesforce Marketing Cloud platform with multiple concurrent campaigns?",
+    star: null,
+    answer: `With multiple campaigns running concurrently in SFMC, regression risk is high because changes to shared assets (Data Extensions, Shared Data Extensions, Sender Profiles, IP Pools, Suppression Lists) can affect multiple campaigns simultaneously.
+
+<strong>My regression strategy:</strong>
+
+<strong>Core regression suite</strong> — I maintain a suite of test cases covering the platform's critical paths: journey entry/exit, email send with personalisation, suppression list application, automation execution, and API connectivity. This suite runs on every deployment.
+
+<strong>Campaign-specific regression</strong> — for each active journey or automation, I maintain a lightweight smoke test (5–10 checks) that verifies the campaign is still functioning: correct audience count, expected email send, data write-backs.
+
+<strong>Impact analysis</strong> — before any change to a shared asset, I produce an impact matrix listing all campaigns that reference it. I test each affected campaign's critical path.
+
+<strong>JIRA integration</strong> — all regression test cases are linked to their originating story. If a regression test fails, I can instantly identify which change introduced the regression.
+
+I aim to automate repetitive data validation checks using SQL query templates, reducing manual effort for each regression cycle.`,
+    tip: "Mention that in SFMC, Business Unit isolation is important — always confirm which BU a test is running in, especially in multi-BU enterprise setups."
+  },
+  // ── NICE TO HAVE ──
+  {
+    cat: "nice", topics: ["sfmc","api"],
+    q: "What experience do you have with Salesforce Data Cloud (CDP)? How would you approach testing data quality and segmentation?",
+    star: null,
+    answer: `In Data Cloud, quality validation spans the full data lifecycle:
+
+<strong>Ingestion Validation</strong> — after a data stream or batch ingestion, I verify record counts, reject rates, and that key fields (email, phone, Salesforce ID) are populated and correctly mapped to the Data Model Objects (DMOs).
+
+<strong>Identity Resolution</strong> — I test that the unification rules are producing expected Individual records. For example, I create test contacts with deliberate overlaps (same email, different names) and validate how they resolve.
+
+<strong>Segmentation Testing</strong> — I build a test segment with a small, known audience and verify:
+• The member count matches my SQL expectation
+• The segment refreshes on the correct schedule
+• Contacts meeting exclusion criteria are absent
+
+<strong>Activation Testing</strong> — I confirm that activated segments arrive in the target (e.g. SFMC, Paid Media) with the correct attribute payload and within the SLA window.
+
+<strong>Data Quality Checks</strong> — I use Data Cloud's built-in Profile Explorer to spot-check individual records and validate that calculated insights (e.g. Lifetime Value, RFM scores) are mathematically correct.`,
+    tip: "Data Cloud is rapidly evolving — mentioning you actively follow Salesforce release notes and Trailhead shows a learning mindset."
+  },
+  {
+    cat: "nice", topics: ["api"],
+    q: "Have you tested across AWS services like S3, Lambda, or CloudWatch? What does QA look like in that context?",
+    star: null,
+    answer: `Yes — SFMC often integrates with AWS for file-based data exchange and event-driven processing.
+
+<strong>S3 Bucket Testing</strong> — I validate that files land in the correct bucket/prefix, with the right naming convention, within the expected SLA. I check file integrity: row count, column schema, encoding, and that PII is handled per policy (e.g. encryption at rest).
+
+<strong>Lambda Testing</strong> — for Lambda functions that transform or route data, I test with both valid and invalid event payloads. I verify the output matches the expected schema and that errors are handled gracefully (DLQ routing, error logging). I use the AWS Console Test Event feature and review CloudWatch logs for execution time, memory usage, and error rates.
+
+<strong>CloudWatch Monitoring</strong> — I use CloudWatch dashboards and alarms as part of release readiness: confirming that error rates are within threshold and that no anomalous patterns emerge after a deployment. This early-detection mindset is particularly valuable for production confidence.`,
+    tip: "Even if you haven't used all three, show you understand the testing principle: input → transform → output, with error handling and observability. That transfers across platforms."
+  },
+  {
+    cat: "nice", topics: ["agile","behavioral"],
+    q: "What test automation experience do you have, and how would you apply it to an SFMC QA context?",
+    star: null,
+    answer: `My automation experience covers API test automation (Postman/Newman collections run in CI/CD pipelines) and data validation scripts in Python and SQL.
+
+In an SFMC context, full UI automation is constrained by the platform's structure, but there are high-value automation opportunities:
+
+<strong>API Regression Suite</strong> — automated Postman/Newman collections that validate SFMC REST API endpoints on each deployment: authentication, contact upsert, journey entry event, DE CRUD operations.
+
+<strong>Data Validation Scripts</strong> — Python scripts (using the SFMC SDK or direct REST calls) that query Data Extensions before and after automation runs and assert expected record counts, field values, and null rates.
+
+<strong>SQL Query Templates</strong> — parameterised SQL scripts that can be re-run across campaigns to validate audience counts, suppression application, and data mapping accuracy.
+
+I prioritise automating tests that are: high-frequency, low-change (stable), and time-consuming to run manually — freeing up QA time for exploratory and complex integration testing.`,
+    tip: "Mention Bruno (open-source Postman alternative) specifically — it appears in the JD and shows you're current with the tooling landscape."
+  },
+  {
+    cat: "nice", topics: ["sfmc","api"],
+    q: "How would you use Datadog (or similar observability tools) as part of your QA practice?",
+    star: null,
+    answer: `Datadog shifts QA from purely pre-release validation toward continuous quality monitoring.
+
+<strong>Release Health Monitoring</strong> — after a deployment, I watch Datadog dashboards for: error rate spikes, latency increases on API endpoints, and anomalies in custom metrics (e.g. "emails sent per hour" dropping to zero unexpectedly).
+
+<strong>Log Analysis for Defect Investigation</strong> — when a defect is reported in production, I use Datadog Log Management to filter by service, time range, and trace ID to quickly pinpoint the root cause rather than relying on manual log parsing.
+
+<strong>Alerting for Early Defect Detection</strong> — I work with the engineering team to define meaningful alert thresholds (e.g. "if the journey entry event API returns >1% 5xx responses, page the on-call engineer"). This creates a safety net beyond scheduled QA runs.
+
+<strong>Synthetic Monitoring</strong> — Datadog Synthetics can simulate API calls and browser interactions on a schedule, providing continuous confirmation that critical paths are functioning in production.
+
+This observability mindset improves production confidence and means defects are caught in minutes rather than days.`,
+    tip: "Frame this as 'quality doesn't stop at deployment' — showing you think about the full production lifecycle impresses senior hiring managers."
+  },
+  {
+    cat: "nice", topics: ["behavioral","agile"],
+    q: "Describe how you have mentored junior QA team members or contributed to improving QA practices across a team.",
+    star: "STAR format recommended",
+    answer: `<strong>Situation:</strong> I was the most senior QA on a project where two junior analysts had joined mid-way through a complex SFMC implementation. They were writing test cases that only covered the happy path and were not testing API error responses or data edge cases.
+
+<strong>Task:</strong> I wanted to upskill them without creating a bottleneck where all complex cases came to me.
+
+<strong>Action:</strong> I introduced a weekly 30-minute "QA Guild" — a structured review of one interesting defect or test case per week, walking through the thinking behind it. I created a test case template in Confluence with mandatory sections: precondition, test data setup, steps, expected result, and edge cases. I also introduced pair-testing on high-risk stories, where I would test alongside the junior analyst and narrate my exploratory thought process. I reviewed their JIRA defects and gave written feedback on completeness and business-impact articulation.
+
+<strong>Result:</strong> Within two sprints, the quality of their test cases measurably improved — edge case coverage increased and defect reports included business impact statements. One analyst independently caught a data mapping error that would have affected 200,000 records. I also documented the testing standards in Confluence so the approach scaled beyond my direct involvement.`,
+    tip: "If you haven't formally mentored, describe how you've contributed to QA documentation, standards, or shared learning — the question accepts either."
+  },
+  {
+    cat: "must", topics: ["behavioral","agile"],
+    q: "How do you prioritise when you have multiple critical defects open and limited time before a release?",
+    star: null,
+    answer: `I use a rapid triage framework based on three factors: <strong>customer/business impact, likelihood of occurrence, and workaround availability</strong>.
+
+<strong>Severity-first sort</strong> — I classify defects:
+• <strong>S1 (Blocker)</strong> — data corruption, emails sending to wrong audience, broken unsubscribe link. Must fix before release.
+• <strong>S2 (Critical)</strong> — personalisation token failing for a subset of records, broken journey path for a segment.
+• <strong>S3/S4</strong> — cosmetic, low-frequency, workaround available.
+
+<strong>Communication</strong> — I convene a brief triage call with the dev lead, product owner, and release manager. I present each S1/S2 defect with: impact statement, fix estimate from dev, and my re-test estimate. We make a collective, informed go/no-go decision.
+
+<strong>Risk acceptance</strong> — for S3/S4 defects, I document the known risk in the release notes and JIRA, get sign-off from the product owner, and ensure a monitoring alert is in place post-release.
+
+I never make the go/no-go call unilaterally — but I ensure the decision-makers have the clear, quantified information they need to decide quickly.`,
+    tip: "Show that you're decisive and data-driven, but also that you escalate rather than absorb risk silently."
+  },
+  {
+    cat: "must", topics: ["sfmc"],
+    q: "What specific checks do you perform when testing an email send in SFMC before it goes to production?",
+    star: null,
+    answer: `I follow a pre-send checklist that covers content, audience, and technical integrity:
+
+<strong>Content Checks:</strong>
+• Subject line and preview text render correctly across email clients (I use Litmus or send to a test inbox matrix)
+• All personalisation tokens (AMPscript) resolve correctly — especially NULL handling (ISNULL fallback values)
+• Dynamic content blocks show the correct variant for each audience segment
+• Unsubscribe / manage preferences links are functional and point to the correct page
+• All URLs are correctly formed and UTM parameters are present and accurate
+• Images load (no broken image paths), alt text is present
+
+<strong>Audience / Data Checks (SQL):</strong>
+• Correct record count in the sending Data Extension
+• No duplicate EmailAddresses
+• No opted-out or suppressed contacts present
+• All mandatory personalisation fields are non-NULL
+
+<strong>Technical Checks:</strong>
+• Correct Sender Profile, Reply Mail Management, and Send Classification applied
+• Correct IP/domain for the send (especially for IP warming scenarios)
+• Correct Business Unit selected
+• Scheduled send time confirmed in the campaign owner's local timezone
+
+I always send a final test email to a seed list that includes my address before approving the send.`,
+    tip: "Mentioning Litmus or Email on Acid shows you know email rendering testing tools beyond SFMC's built-in preview."
+  },
+];
+
+// ── Render ──
+const main = document.getElementById('main');
+let openCards = new Set();
+let currentFilter = 'all';
+
+function renderAll(filter) {
+  main.innerHTML = '';
+  const filtered = QS.filter(q => {
+    if (filter === 'all') return true;
+    if (filter === 'must') return q.cat === 'must';
+    if (filter === 'nice') return q.cat === 'nice';
+    return q.topics.includes(filter);
+  });
+
+  if (!filtered.length) {
+    main.innerHTML = '<div class="no-results">No questions match this filter.</div>';
+    updateStats(); return;
+  }
+
+  // Group by category
+  const must = filtered.filter(q => q.cat === 'must');
+  const nice = filtered.filter(q => q.cat === 'nice');
+
+  if (must.length) {
+    const sg = document.createElement('div');
+    sg.className = 'section-group';
+    sg.innerHTML = `<div class="section-label"><span style="color:var(--must)">✦ Must-Have Skills</span></div>`;
+    must.forEach((q, i) => sg.appendChild(makeCard(q, i + 1)));
+    main.appendChild(sg);
+  }
+  if (nice.length) {
+    const sg = document.createElement('div');
+    sg.className = 'section-group';
+    sg.innerHTML = `<div class="section-label"><span style="color:var(--nice)">◈ Nice-to-Have Skills</span></div>`;
+    nice.forEach((q, i) => sg.appendChild(makeCard(q, must.length + i + 1)));
+    main.appendChild(sg);
+  }
+  updateStats();
+}
+
+function makeCard(q, n) {
+  const card = document.createElement('div');
+  card.className = `card${q.cat === 'nice' ? ' nice-have' : ''}`;
+  if (openCards.has(q.q)) card.classList.add('open');
+
+  const starHtml = q.star ? `<div class="answer-label" style="margin-bottom:4px;margin-top:0">★ ${q.star}</div>` : '';
+  const codeHtml = q.code ? `<code>${q.code}</code>` : '';
+  const answerPost = q.answerPost ? `<p style="margin-top:8px" class="answer-text">${q.answerPost}</p>` : '';
+  const tipHtml = q.tip ? `<div class="tip-box"><div class="tip-label">💡 Interviewer Tip</div><div class="tip-text">${q.tip}</div></div>` : '';
+  const tagCat = `<span class="tag ${q.cat === 'must' ? 'tag-must' : 'tag-nice'}">${q.cat === 'must' ? '✦ Must' : '◈ Nice'}</span>`;
+  const tagTopics = q.topics.map(t => `<span class="tag tag-topic">${t}</span>`).join('');
+
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="q-num">Q${String(n).padStart(2,'0')}</span>
+      <div style="flex:1">
+        <div class="q-text">${q.q}</div>
+        <div class="tags">${tagCat}${tagTopics}</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="answer">
+      <div class="answer-inner">
+        <div class="divider"></div>
+        ${starHtml}
+        <div class="answer-label">Model Answer</div>
+        <div class="answer-text">${q.answer}</div>
+        ${codeHtml}
+        ${answerPost}
+        ${tipHtml}
+      </div>
+    </div>`;
+
+  card.querySelector('.card-header').addEventListener('click', () => {
+    card.classList.toggle('open');
+    if (card.classList.contains('open')) openCards.add(q.q);
+    else openCards.delete(q.q);
+    updateStats();
+  });
+  return card;
+}
+
+function updateStats() {
+  const total = QS.length;
+  const must = QS.filter(q => q.cat === 'must').length;
+  const nice = QS.filter(q => q.cat === 'nice').length;
+  const opened = openCards.size;
+  document.getElementById('totalQ').textContent = total;
+  document.getElementById('mustQ').textContent = must;
+  document.getElementById('niceQ').textContent = nice;
+  document.getElementById('openQ').textContent = opened;
+  document.getElementById('pFill').style.width = `${Math.round(opened / total * 100)}%`;
+  document.getElementById('pCount').textContent = `${opened} / ${total}`;
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderAll(currentFilter);
+  });
+});
+
+renderAll('all');
+</script>
+</body>
+</html>

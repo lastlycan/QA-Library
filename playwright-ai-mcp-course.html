@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playwright × AI × MCP — Interactive Course</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #11141a;
+    --surface2: #181c24;
+    --border: #1f2530;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --warn: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --code-bg: #0d1117;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+  /* Header */
+  header {
+    padding: 60px 20px 40px;
+    text-align: center;
+    position: relative;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+
+  h1 {
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+    margin-bottom: 16px;
+  }
+
+  h1 .pw { color: var(--accent); }
+  h1 .ai { color: var(--accent2); }
+  h1 .mcp { color: var(--accent3); }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 18px;
+    max-width: 520px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    max-width: 600px;
+    margin: 0 auto 48px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .progress-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+  .progress-pct { font-size: 13px; color: var(--accent); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+
+  /* Nav tabs */
+  .module-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    max-width: 700px;
+    margin: 0 auto 40px;
+    overflow-x: auto;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+
+  .tab-btn:hover { color: var(--text); background: var(--border); }
+  .tab-btn.active { background: var(--accent2); color: white; }
+
+  /* Modules */
+  .module { display: none; }
+  .module.active { display: block; }
+
+  /* Lesson cards */
+  .lesson-grid { display: grid; gap: 16px; margin-bottom: 40px; }
+
+  .lesson-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+
+  .lesson-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
+  .lesson-card.completed { border-color: var(--accent3); }
+  .lesson-card.expanded { border-color: var(--accent); }
+
+  .lesson-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+  }
+
+  .lesson-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: var(--surface2);
+    color: var(--muted);
+  }
+
+  .lesson-card.completed .lesson-num { background: rgba(16,185,129,0.15); color: var(--accent3); }
+  .lesson-card.expanded .lesson-num { background: rgba(0,229,255,0.15); color: var(--accent); }
+
+  .lesson-info { flex: 1 }
+  .lesson-title { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+  .lesson-meta { font-size: 12px; color: var(--muted); }
+
+  .lesson-status {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .status-new { background: rgba(124,58,237,0.15); color: var(--accent2); }
+  .status-done { background: rgba(16,185,129,0.15); color: var(--accent3); }
+
+  .lesson-body {
+    display: none;
+    padding: 0 24px 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .lesson-card.expanded .lesson-body { display: block; }
+
+  .lesson-body h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 20px 0 12px;
+  }
+
+  .lesson-body p { font-size: 14px; line-height: 1.7; color: #94a3b8; margin-bottom: 12px; }
+
+  /* Code blocks */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 16px 0;
+    position: relative;
+  }
+
+  pre code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c9d1d9;
+  }
+
+  .kw { color: #ff7b72; }
+  .fn { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .cmt { color: #6e7681; font-style: italic; }
+  .num { color: #79c0ff; }
+  .cls { color: #ffa657; }
+  .prop { color: #79c0ff; }
+
+  .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Key points */
+  .key-points { list-style: none; display: grid; gap: 8px; }
+  .key-points li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+  .key-points li::before {
+    content: '→';
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Quiz */
+  .quiz-section {
+    margin-top: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .quiz-q { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+
+  .quiz-options { display: grid; gap: 8px; }
+
+  .quiz-opt {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+  }
+
+  .quiz-opt:hover:not(:disabled) { border-color: var(--accent2); color: white; }
+  .quiz-opt.correct { border-color: var(--accent3); background: rgba(16,185,129,0.1); color: var(--accent3); }
+  .quiz-opt.wrong { border-color: #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; }
+
+  .quiz-feedback { margin-top: 12px; font-size: 13px; padding: 10px 14px; border-radius: 8px; display: none; }
+  .quiz-feedback.correct { background: rgba(16,185,129,0.1); color: var(--accent3); display: block; }
+  .quiz-feedback.wrong { background: rgba(239,68,68,0.1); color: #ef4444; display: block; }
+
+  .mark-done-btn {
+    margin-top: 16px;
+    padding: 10px 20px;
+    background: var(--accent2);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    width: 100%;
+  }
+  .mark-done-btn:hover { opacity: 0.85; }
+
+  /* AI Playground */
+  .playground {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+
+  .playground-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface2);
+  }
+
+  .playground-title { font-size: 14px; font-weight: 700; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .playground-body { padding: 24px; }
+
+  .chat-messages {
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .msg {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 85%;
+  }
+
+  .msg.user {
+    background: rgba(124,58,237,0.2);
+    border: 1px solid rgba(124,58,237,0.3);
+    align-self: flex-end;
+    color: #e2e8f0;
+  }
+
+  .msg.assistant {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    align-self: flex-start;
+    color: #94a3b8;
+  }
+
+  .msg.assistant code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent);
+  }
+
+  .chat-input-row { display: flex; gap: 10px; }
+
+  .chat-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .chat-input:focus { border-color: var(--accent2); }
+
+  .chat-send {
+    padding: 12px 20px;
+    background: var(--accent2);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .chat-send:hover { opacity: 0.85; }
+  .chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .suggested-prompts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .prompt-chip {
+    padding: 6px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .prompt-chip:hover { border-color: var(--accent2); color: var(--text); }
+
+  /* Cheatsheet */
+  .cheatsheet { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 40px; }
+
+  .cs-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .cs-card h3 { font-size: 13px; color: var(--accent); margin-bottom: 12px; font-weight: 700; letter-spacing: 0.5px; }
+  .cs-card code {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #79c0ff;
+    background: var(--code-bg);
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+  }
+  .cs-card p { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+  /* Thinking dots */
+  .thinking { display: flex; gap: 4px; align-items: center; padding: 8px 0; }
+  .thinking span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent2);
+    animation: bounce 1s infinite;
+  }
+  .thinking span:nth-child(2) { animation-delay: 0.15s; }
+  .thinking span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  scrollbar-width: thin;
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">⚡ Interactive Course</div>
+  <h1>
+    <span class="pw">Playwright</span> ×<br>
+    <span class="ai">AI</span> × <span class="mcp">MCP</span>
+  </h1>
+  <p class="subtitle">Master browser automation with AI-powered test generation and Model Context Protocol integration</p>
+
+  <div class="progress-bar">
+    <span class="progress-label">Overall Progress</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-pct" id="progressPct">0%</span>
+  </div>
+
+  <div class="module-tabs">
+    <button class="tab-btn active" onclick="switchTab('fundamentals')">🎯 Fundamentals</button>
+    <button class="tab-btn" onclick="switchTab('ai')">🤖 AI Integration</button>
+    <button class="tab-btn" onclick="switchTab('mcp')">🔌 MCP</button>
+    <button class="tab-btn" onclick="switchTab('advanced')">⚙️ Advanced</button>
+    <button class="tab-btn" onclick="switchTab('cicd')">🚀 CI/CD</button>
+    <button class="tab-btn" onclick="switchTab('project')">🏗️ Project</button>
+    <button class="tab-btn" onclick="switchTab('playground')">💬 AI Tutor</button>
+    <button class="tab-btn" onclick="switchTab('cheatsheet')">📋 Cheatsheet</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ── MODULE 1: FUNDAMENTALS ── -->
+  <div id="mod-fundamentals" class="module active">
+
+    <div class="lesson-grid">
+
+      <!-- Lesson 1 -->
+      <div class="lesson-card" id="lesson-1">
+        <div class="lesson-header" onclick="toggleLesson('lesson-1')">
+          <div class="lesson-num">01</div>
+          <div class="lesson-info">
+            <div class="lesson-title">What is Playwright & Why It Matters</div>
+            <div class="lesson-meta">Intro · 5 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>Overview</h3>
+          <p>Playwright is Microsoft's open-source browser automation library. It supports Chromium, Firefox, and WebKit from a single API — and it's the fastest-growing automation tool in the industry.</p>
+
+          <h3>Key Points</h3>
+          <ul class="key-points">
+            <li>Cross-browser: Chrome, Firefox, Safari (WebKit) with a single codebase</li>
+            <li>Auto-waits — no more <code>sleep()</code> or flaky timing hacks</li>
+            <li>Built-in test runner, tracing, screenshots, and video recording</li>
+            <li>Supports TypeScript, JavaScript, Python, Java, .NET</li>
+            <li>Native support for parallel execution and sharding</li>
+          </ul>
+
+          <h3>Install</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt"># Install Playwright + browsers</span>
+npm init playwright@latest
+
+<span class="cmt"># Or add to existing project</span>
+npm install -D @playwright/test
+npx playwright install</code></pre>
+
+          <div class="quiz-section">
+            <div class="quiz-q">Which of the following is NOT a browser engine Playwright supports natively?</div>
+            <div class="quiz-options">
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">Chromium</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">WebKit</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, true)">Trident (IE)</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">Firefox</button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="mark-done-btn" onclick="markDone('lesson-1')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+      <!-- Lesson 2 -->
+      <div class="lesson-card" id="lesson-2">
+        <div class="lesson-header" onclick="toggleLesson('lesson-2')">
+          <div class="lesson-num">02</div>
+          <div class="lesson-info">
+            <div class="lesson-title">Writing Your First Test</div>
+            <div class="lesson-meta">Hands-On · 10 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>Basic Test Structure</h3>
+          <p>Every Playwright test uses <code>test()</code> and receives a <code>page</code> fixture. Here's a complete test you can run immediately:</p>
+
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="kw">import</span> { <span class="fn">test</span>, <span class="fn">expect</span> } <span class="kw">from</span> <span class="str">'@playwright/test'</span>;
+
+<span class="fn">test</span>(<span class="str">'homepage has correct title'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="cmt">// Navigate to a URL</span>
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'https://playwright.dev'</span>);
+
+  <span class="cmt">// Assert page title</span>
+  <span class="kw">await</span> <span class="fn">expect</span>(page).<span class="fn">toHaveTitle</span>(<span class="str">/Playwright/</span>);
+
+  <span class="cmt">// Click the "Get Started" link</span>
+  <span class="kw">await</span> page.<span class="fn">getByRole</span>(<span class="str">'link'</span>, { name: <span class="str">'Get started'</span> }).<span class="fn">click</span>();
+
+  <span class="cmt">// Verify navigation happened</span>
+  <span class="kw">await</span> <span class="fn">expect</span>(page).<span class="fn">toHaveURL</span>(<span class="str">/.*intro/</span>);
+});</code></pre>
+
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt"># Run your tests</span>
+npx playwright test
+
+<span class="cmt"># Run with UI mode (interactive)</span>
+npx playwright test --ui
+
+<span class="cmt"># Run headed (see the browser)</span>
+npx playwright test --headed</code></pre>
+
+          <h3>Key Points</h3>
+          <ul class="key-points">
+            <li>Prefer <code>getByRole()</code> over CSS selectors — it's more resilient</li>
+            <li>Always <code>await</code> Playwright actions — they're all promises</li>
+            <li>Use <code>expect()</code> assertions with auto-retry built in</li>
+          </ul>
+
+          <div class="quiz-section">
+            <div class="quiz-q">What does <code>getByRole('button', { name: 'Submit' })</code> select?</div>
+            <div class="quiz-options">
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">Any element with class 'button'</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, true)">A button element with accessible name "Submit"</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">An input of type submit</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">An element with id="submit"</button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="mark-done-btn" onclick="markDone('lesson-2')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+      <!-- Lesson 3 -->
+      <div class="lesson-card" id="lesson-3">
+        <div class="lesson-header" onclick="toggleLesson('lesson-3')">
+          <div class="lesson-num">03</div>
+          <div class="lesson-info">
+            <div class="lesson-title">Locators & Selectors Deep Dive</div>
+            <div class="lesson-meta">Core Skill · 12 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>The Locator Hierarchy (Best → Worst)</h3>
+          <p>Playwright's locator strategy is key to writing stable tests. Follow this priority order:</p>
+
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">// ✅ BEST — role-based (semantic, accessible)</span>
+page.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">'Login'</span> })
+page.<span class="fn">getByRole</span>(<span class="str">'textbox'</span>, { name: <span class="str">'Email'</span> })
+
+<span class="cmt">// ✅ GOOD — text-based</span>
+page.<span class="fn">getByText</span>(<span class="str">'Welcome back!'</span>)
+page.<span class="fn">getByLabel</span>(<span class="str">'Password'</span>)
+page.<span class="fn">getByPlaceholder</span>(<span class="str">'Enter your email'</span>)
+
+<span class="cmt">// ✅ GOOD — test IDs (recommended for complex apps)</span>
+page.<span class="fn">getByTestId</span>(<span class="str">'submit-btn'</span>) <span class="cmt">// data-testid="submit-btn"</span>
+
+<span class="cmt">// ⚠️  AVOID — brittle selectors</span>
+page.<span class="fn">locator</span>(<span class="str">'.btn-primary'</span>) <span class="cmt">// CSS class can change</span>
+page.<span class="fn">locator</span>(<span class="str">'#login-btn'</span>) <span class="cmt">// IDs can change</span>
+page.<span class="fn">locator</span>(<span class="str">'//button[1]'</span>) <span class="cmt">// XPath is fragile</span></code></pre>
+
+          <h3>Chaining & Filtering</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">// Filter by child element</span>
+page.<span class="fn">getByRole</span>(<span class="str">'listitem'</span>)
+    .<span class="fn">filter</span>({ hasText: <span class="str">'Product 1'</span> })
+    .<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">'Add to cart'</span> })
+
+<span class="cmt">// Count items</span>
+<span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">getByRole</span>(<span class="str">'listitem'</span>)).<span class="fn">toHaveCount</span>(<span class="num">3</span>);</code></pre>
+
+          <button class="mark-done-btn" onclick="markDone('lesson-3')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+      <!-- Lesson 4 -->
+      <div class="lesson-card" id="lesson-4">
+        <div class="lesson-header" onclick="toggleLesson('lesson-4')">
+          <div class="lesson-num">04</div>
+          <div class="lesson-info">
+            <div class="lesson-title">Page Object Model (POM)</div>
+            <div class="lesson-meta">Architecture · 15 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>Why POM?</h3>
+          <p>The Page Object Model separates test logic from page interaction details. When the UI changes, you update one place — not every test.</p>
+
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">// pages/LoginPage.ts</span>
+<span class="kw">import</span> { <span class="cls">Page</span>, <span class="cls">Locator</span> } <span class="kw">from</span> <span class="str">'@playwright/test'</span>;
+
+<span class="kw">export class</span> <span class="cls">LoginPage</span> {
+  <span class="kw">private</span> emailInput: <span class="cls">Locator</span>;
+  <span class="kw">private</span> passwordInput: <span class="cls">Locator</span>;
+  <span class="kw">private</span> submitBtn: <span class="cls">Locator</span>;
+
+  <span class="fn">constructor</span>(<span class="kw">private</span> page: <span class="cls">Page</span>) {
+    <span class="kw">this</span>.emailInput = page.<span class="fn">getByLabel</span>(<span class="str">'Email'</span>);
+    <span class="kw">this</span>.passwordInput = page.<span class="fn">getByLabel</span>(<span class="str">'Password'</span>);
+    <span class="kw">this</span>.submitBtn = page.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">'Sign in'</span> });
+  }
+
+  <span class="kw">async</span> <span class="fn">goto</span>() {
+    <span class="kw">await</span> <span class="kw">this</span>.page.<span class="fn">goto</span>(<span class="str">'/login'</span>);
+  }
+
+  <span class="kw">async</span> <span class="fn">login</span>(email: <span class="kw">string</span>, password: <span class="kw">string</span>) {
+    <span class="kw">await</span> <span class="kw">this</span>.emailInput.<span class="fn">fill</span>(email);
+    <span class="kw">await</span> <span class="kw">this</span>.passwordInput.<span class="fn">fill</span>(password);
+    <span class="kw">await</span> <span class="kw">this</span>.submitBtn.<span class="fn">click</span>();
+  }
+}
+
+<span class="cmt">// tests/login.spec.ts</span>
+<span class="fn">test</span>(<span class="str">'successful login'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">const</span> loginPage = <span class="kw">new</span> <span class="cls">LoginPage</span>(page);
+  <span class="kw">await</span> loginPage.<span class="fn">goto</span>();
+  <span class="kw">await</span> loginPage.<span class="fn">login</span>(<span class="str">'user@test.com'</span>, <span class="str">'secret123'</span>);
+  <span class="kw">await</span> <span class="fn">expect</span>(page).<span class="fn">toHaveURL</span>(<span class="str">'/dashboard'</span>);
+});</code></pre>
+
+          <div class="quiz-section">
+            <div class="quiz-q">What's the main benefit of the Page Object Model?</div>
+            <div class="quiz-options">
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">Tests run faster</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, true)">UI changes only need to be updated in one place</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">It eliminates the need for locators</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">It makes tests run in parallel automatically</button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="mark-done-btn" onclick="markDone('lesson-4')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MODULE 2: AI INTEGRATION ── -->
+  <div id="mod-ai" class="module">
+
+    <div class="lesson-grid">
+
+      <!-- Lesson 5 -->
+      <div class="lesson-card" id="lesson-5">
+        <div class="lesson-header" onclick="toggleLesson('lesson-5')">
+          <div class="lesson-num">05</div>
+          <div class="lesson-info">
+            <div class="lesson-title">AI-Powered Test Generation</div>
+            <div class="lesson-meta">AI Basics · 10 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>How AI Fits Into Testing</h3>
+          <p>AI accelerates test creation by generating test cases from requirements, UI screenshots, or user stories — reducing the time from feature to test by 60-80%.</p>
+
+          <h3>Prompt Engineering for Tests</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">// Example prompt for Claude / GPT to generate tests:</span>
+<span class="str">"""
+You are an expert QA engineer using Playwright with TypeScript.
+
+Given this user story:
+"As a user, I want to reset my password by entering my email
+ and receiving a reset link."
+
+Generate a complete Playwright test file that:
+1. Tests the happy path (valid email)
+2. Tests validation (empty email, invalid format)
+3. Tests the success confirmation message
+4. Uses Page Object Model pattern
+5. Uses role-based locators where possible
+"""</span></code></pre>
+
+          <h3>Key Points</h3>
+          <ul class="key-points">
+            <li>Give AI the context: URL, tech stack, testing patterns you use</li>
+            <li>Attach screenshots — AI can infer locators from visual UI</li>
+            <li>Always review AI-generated tests before committing</li>
+            <li>Use AI to generate edge cases you might miss</li>
+          </ul>
+          <button class="mark-done-btn" onclick="markDone('lesson-5')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+      <!-- Lesson 6 -->
+      <div class="lesson-card" id="lesson-6">
+        <div class="lesson-header" onclick="toggleLesson('lesson-6')">
+          <div class="lesson-num">06</div>
+          <div class="lesson-info">
+            <div class="lesson-title">Playwright Codegen + AI Cleanup</div>
+            <div class="lesson-meta">Workflow · 8 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>Record First, Refine with AI</h3>
+          <p>Playwright's built-in codegen records your browser interactions. Then pipe that output to an AI to clean it up into production-quality tests.</p>
+
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt"># Step 1: Record interactions</span>
+npx playwright codegen https://your-app.com
+
+<span class="cmt"># This outputs raw recorded code like:</span>
+<span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">'#username'</span>).<span class="fn">click</span>();
+<span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">'#username'</span>).<span class="fn">fill</span>(<span class="str">'admin'</span>);
+<span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">'[data-v-btn]'</span>).<span class="fn">click</span>(); <span class="cmt">// 😬 brittle</span></code></pre>
+
+          <h3>AI Prompt to Refine Codegen Output</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="str">"""
+Refactor this Playwright codegen output:
+[paste your recorded code]
+
+Requirements:
+- Replace all CSS/attribute selectors with role-based locators
+- Extract into a Page Object class
+- Add meaningful assertions after each action
+- Add data-testid attributes where role selectors aren't possible
+- Group related actions into helper methods
+"""</span></code></pre>
+
+          <button class="mark-done-btn" onclick="markDone('lesson-6')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+      <!-- Lesson 7 -->
+      <div class="lesson-card" id="lesson-7">
+        <div class="lesson-header" onclick="toggleLesson('lesson-7')">
+          <div class="lesson-num">07</div>
+          <div class="lesson-info">
+            <div class="lesson-title">AI for Visual Testing & Self-Healing</div>
+            <div class="lesson-meta">Advanced · 15 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>Vision-Based Test Analysis</h3>
+          <p>Send Playwright screenshots to a vision AI model to detect UI regressions, validate layouts, and self-heal broken selectors.</p>
+
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="kw">import</span> Anthropic <span class="kw">from</span> <span class="str">'@anthropic-ai/sdk'</span>;
+<span class="kw">import</span> { <span class="fn">test</span>, <span class="fn">expect</span> } <span class="kw">from</span> <span class="str">'@playwright/test'</span>;
+<span class="kw">import</span> fs <span class="kw">from</span> <span class="str">'fs'</span>;
+
+<span class="fn">test</span>(<span class="str">'AI visual validation'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'https://your-app.com/checkout'</span>);
+
+  <span class="cmt">// Take screenshot</span>
+  <span class="kw">const</span> screenshot = <span class="kw">await</span> page.<span class="fn">screenshot</span>();
+
+  <span class="cmt">// Send to Claude for visual analysis</span>
+  <span class="kw">const</span> client = <span class="kw">new</span> <span class="cls">Anthropic</span>();
+  <span class="kw">const</span> response = <span class="kw">await</span> client.messages.<span class="fn">create</span>({
+    model: <span class="str">'claude-opus-4-6'</span>,
+    max_tokens: <span class="num">1024</span>,
+    messages: [{
+      role: <span class="str">'user'</span>,
+      content: [
+        {
+          type: <span class="str">'image'</span>,
+          source: {
+            type: <span class="str">'base64'</span>,
+            media_type: <span class="str">'image/png'</span>,
+            data: screenshot.<span class="fn">toString</span>(<span class="str">'base64'</span>)
+          }
+        },
+        {
+          type: <span class="str">'text'</span>,
+          text: <span class="str">'Does this checkout page show a price total and a "Place Order" button? Answer with YES/NO and explain any issues.'</span>
+        }
+      ]
+    }]
+  });
+
+  <span class="kw">const</span> aiVerdict = response.content[<span class="num">0</span>].text;
+  <span class="fn">expect</span>(aiVerdict).<span class="fn">toContain</span>(<span class="str">'YES'</span>);
+});</code></pre>
+
+          <button class="mark-done-btn" onclick="markDone('lesson-7')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MODULE 3: MCP ── -->
+  <div id="mod-mcp" class="module">
+
+    <div class="lesson-grid">
+
+      <!-- Lesson 8 -->
+      <div class="lesson-card" id="lesson-8">
+        <div class="lesson-header" onclick="toggleLesson('lesson-8')">
+          <div class="lesson-num">08</div>
+          <div class="lesson-info">
+            <div class="lesson-title">What is the Model Context Protocol?</div>
+            <div class="lesson-meta">Concepts · 8 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>MCP Explained</h3>
+          <p>MCP (Model Context Protocol) is an open standard by Anthropic that lets AI models communicate with external tools, data sources, and services through a unified interface. Think of it as USB-C for AI integrations.</p>
+
+          <h3>The Architecture</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">┌─────────────┐     MCP Protocol      ┌─────────────────┐
+│  AI Model   │ ←─────────────────→  │   MCP Server    │
+│  (Claude)   │                       │                 │
+└─────────────┘                       │  - Playwright   │
+                                      │  - Databases    │
+                                      │  - APIs         │
+                                      │  - File system  │
+                                      └─────────────────┘</span></code></pre>
+
+          <h3>Key Points</h3>
+          <ul class="key-points">
+            <li>MCP servers expose tools, resources, and prompts to AI models</li>
+            <li>Claude can call Playwright via MCP to control a browser autonomously</li>
+            <li>No hardcoded selectors needed — AI navigates visually</li>
+            <li>MCP enables agentic test creation: describe what to test, AI figures out how</li>
+          </ul>
+          <button class="mark-done-btn" onclick="markDone('lesson-8')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+      <!-- Lesson 9 -->
+      <div class="lesson-card" id="lesson-9">
+        <div class="lesson-header" onclick="toggleLesson('lesson-9')">
+          <div class="lesson-num">09</div>
+          <div class="lesson-info">
+            <div class="lesson-title">Setting Up the Playwright MCP Server</div>
+            <div class="lesson-meta">Setup · 15 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>Install Playwright MCP</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt"># Install the official Playwright MCP server</span>
+npm install -g @playwright/mcp</code></pre>
+
+          <h3>Configure Claude Desktop</h3>
+          <p>Add to your <code>claude_desktop_config.json</code>:</p>
+
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>{
+  <span class="prop">"mcpServers"</span>: {
+    <span class="prop">"playwright"</span>: {
+      <span class="prop">"command"</span>: <span class="str">"npx"</span>,
+      <span class="prop">"args"</span>: [<span class="str">"@playwright/mcp@latest"</span>],
+      <span class="prop">"env"</span>: {
+        <span class="prop">"PLAYWRIGHT_HEADLESS"</span>: <span class="str">"true"</span>
+      }
+    }
+  }
+}</code></pre>
+
+          <h3>Config file location</h3>
+          <ul class="key-points">
+            <li>macOS: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></li>
+            <li>Windows: <code>%APPDATA%\Claude\claude_desktop_config.json</code></li>
+            <li>Linux: <code>~/.config/claude/claude_desktop_config.json</code></li>
+          </ul>
+
+          <button class="mark-done-btn" onclick="markDone('lesson-9')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+      <!-- Lesson 10 -->
+      <div class="lesson-card" id="lesson-10">
+        <div class="lesson-header" onclick="toggleLesson('lesson-10')">
+          <div class="lesson-num">10</div>
+          <div class="lesson-info">
+            <div class="lesson-title">Agentic Browser Testing with Claude + MCP</div>
+            <div class="lesson-meta">Advanced · 20 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>The Power of Agentic Testing</h3>
+          <p>With MCP connected, you can simply describe a test scenario in natural language and Claude will navigate, interact, and verify — all autonomously.</p>
+
+          <h3>Example Conversation with Claude + Playwright MCP</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">You: "Go to https://myapp.com/login, log in with 
+     test@example.com / password123, then verify the 
+     dashboard loads and shows the user's name."
+
+Claude: [uses playwright_navigate tool]
+        [uses playwright_fill tool for email field]  
+        [uses playwright_fill tool for password field]
+        [uses playwright_click tool on Login button]
+        [uses playwright_screenshot tool]
+        [uses playwright_get_text to verify user name]
+        
+        "✅ Test passed! The dashboard loaded successfully 
+        and shows 'Welcome, Test User' in the header."</span></code></pre>
+
+          <h3>Available MCP Tools (Playwright Server)</h3>
+          <ul class="key-points">
+            <li><code>playwright_navigate</code> — Go to a URL</li>
+            <li><code>playwright_screenshot</code> — Capture current state</li>
+            <li><code>playwright_click</code> — Click by element description</li>
+            <li><code>playwright_fill</code> — Type into a field</li>
+            <li><code>playwright_get_text</code> — Extract page content</li>
+            <li><code>playwright_evaluate</code> — Run JavaScript on the page</li>
+          </ul>
+
+          <h3>Write an MCP-Compatible Test Server</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="kw">import</span> { <span class="cls">McpServer</span> } <span class="kw">from</span> <span class="str">'@modelcontextprotocol/sdk/server/mcp.js'</span>;
+<span class="kw">import</span> { <span class="fn">chromium</span> } <span class="kw">from</span> <span class="str">'playwright'</span>;
+<span class="kw">import</span> { z } <span class="kw">from</span> <span class="str">'zod'</span>;
+
+<span class="kw">const</span> server = <span class="kw">new</span> <span class="cls">McpServer</span>({ name: <span class="str">'my-playwright-mcp'</span> });
+
+server.<span class="fn">tool</span>(
+  <span class="str">'take_screenshot'</span>,
+  { url: z.<span class="fn">string</span>().<span class="fn">url</span>() },
+  <span class="kw">async</span> ({ url }) => {
+    <span class="kw">const</span> browser = <span class="kw">await</span> chromium.<span class="fn">launch</span>();
+    <span class="kw">const</span> page = <span class="kw">await</span> browser.<span class="fn">newPage</span>();
+    <span class="kw">await</span> page.<span class="fn">goto</span>(url);
+    <span class="kw">const</span> screenshot = <span class="kw">await</span> page.<span class="fn">screenshot</span>({ encoding: <span class="str">'base64'</span> });
+    <span class="kw">await</span> browser.<span class="fn">close</span>();
+    <span class="kw">return</span> { content: [{ type: <span class="str">'image'</span>, data: screenshot, mimeType: <span class="str">'image/png'</span> }] };
+  }
+);</code></pre>
+
+          <div class="quiz-section">
+            <div class="quiz-q">With Playwright MCP, how does Claude know which element to click?</div>
+            <div class="quiz-options">
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">You must provide a CSS selector in your prompt</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">Claude reads the page's source code only</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, true)">Claude uses screenshots and page structure to identify elements visually</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">You must record a macro first</button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="mark-done-btn" onclick="markDone('lesson-10')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MODULE 4: ADVANCED PATTERNS ── -->
+  <div id="mod-advanced" class="module">
+    <div class="lesson-grid">
+
+      <!-- Lesson 11 -->
+      <div class="lesson-card" id="lesson-11">
+        <div class="lesson-header" onclick="toggleLesson('lesson-11')">
+          <div class="lesson-num">11</div>
+          <div class="lesson-info">
+            <div class="lesson-title">Fixtures & Custom Test Context</div>
+            <div class="lesson-meta">Architecture · 15 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>What Are Fixtures?</h3>
+          <p>Fixtures are Playwright's dependency injection system. They let you set up shared context (logged-in user, seeded DB, pre-navigated page) once and reuse it across tests without copy-pasting setup code.</p>
+
+          <h3>Built-in Fixtures</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">// Playwright provides these out of the box:</span>
+<span class="fn">test</span>(<span class="str">'example'</span>, <span class="kw">async</span> ({ page, context, browser, request }) => {
+  <span class="cmt">// page     → a fresh Page for each test</span>
+  <span class="cmt">// context  → a BrowserContext (cookies, storage)</span>
+  <span class="cmt">// browser  → the Browser instance</span>
+  <span class="cmt">// request  → APIRequestContext for HTTP calls</span>
+});</code></pre>
+
+          <h3>Custom Fixtures — Logged-In User</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">// fixtures/auth.ts</span>
+<span class="kw">import</span> { <span class="fn">test</span> <span class="kw">as</span> base, <span class="fn">expect</span> } <span class="kw">from</span> <span class="str">'@playwright/test'</span>;
+<span class="kw">import</span> { <span class="cls">LoginPage</span> } <span class="kw">from</span> <span class="str">'../pages/LoginPage'</span>;
+
+<span class="kw">type</span> <span class="cls">AuthFixtures</span> = {
+  authenticatedPage: <span class="cls">Page</span>;
+};
+
+<span class="kw">export const</span> <span class="fn">test</span> = base.<span class="fn">extend</span>&lt;<span class="cls">AuthFixtures</span>&gt;({
+  authenticatedPage: <span class="kw">async</span> ({ page }, use) => {
+    <span class="cmt">// Setup: log in before the test</span>
+    <span class="kw">const</span> login = <span class="kw">new</span> <span class="cls">LoginPage</span>(page);
+    <span class="kw">await</span> login.<span class="fn">goto</span>();
+    <span class="kw">await</span> login.<span class="fn">login</span>(<span class="str">'admin@test.com'</span>, <span class="str">'pass123'</span>);
+    <span class="kw">await</span> <span class="fn">expect</span>(page).<span class="fn">toHaveURL</span>(<span class="str">'/dashboard'</span>);
+
+    <span class="cmt">// Hand the page to the test</span>
+    <span class="kw">await</span> <span class="fn">use</span>(page);
+
+    <span class="cmt">// Teardown (optional): clean up after test</span>
+    <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/logout'</span>);
+  }
+});
+
+<span class="cmt">// tests/dashboard.spec.ts</span>
+<span class="kw">import</span> { <span class="fn">test</span> } <span class="kw">from</span> <span class="str">'../fixtures/auth'</span>;
+
+<span class="fn">test</span>(<span class="str">'dashboard shows widgets'</span>, <span class="kw">async</span> ({ authenticatedPage }) => {
+  <span class="cmt">// Already logged in! No setup needed.</span>
+  <span class="kw">await</span> <span class="fn">expect</span>(authenticatedPage.<span class="fn">getByRole</span>(<span class="str">'heading'</span>, { name: <span class="str">'Dashboard'</span> })).<span class="fn">toBeVisible</span>();
+});</code></pre>
+
+          <h3>Faster Login with Storage State</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">// global-setup.ts — run once before all tests</span>
+<span class="kw">import</span> { <span class="fn">chromium</span> } <span class="kw">from</span> <span class="str">'@playwright/test'</span>;
+
+<span class="kw">export default async function</span> <span class="fn">globalSetup</span>() {
+  <span class="kw">const</span> browser = <span class="kw">await</span> chromium.<span class="fn">launch</span>();
+  <span class="kw">const</span> page = <span class="kw">await</span> browser.<span class="fn">newPage</span>();
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'http://localhost:3000/login'</span>);
+  <span class="kw">await</span> page.<span class="fn">getByLabel</span>(<span class="str">'Email'</span>).<span class="fn">fill</span>(<span class="str">'admin@test.com'</span>);
+  <span class="kw">await</span> page.<span class="fn">getByLabel</span>(<span class="str">'Password'</span>).<span class="fn">fill</span>(<span class="str">'secret'</span>);
+  <span class="kw">await</span> page.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">'Login'</span> }).<span class="fn">click</span>();
+
+  <span class="cmt">// Save cookies + localStorage — reused by all tests!</span>
+  <span class="kw">await</span> page.<span class="fn">context</span>().<span class="fn">storageState</span>({ path: <span class="str">'auth.json'</span> });
+  <span class="kw">await</span> browser.<span class="fn">close</span>();
+}
+
+<span class="cmt">// playwright.config.ts</span>
+<span class="kw">export default</span> {
+  globalSetup: <span class="str">'./global-setup.ts'</span>,
+  use: { storageState: <span class="str">'auth.json'</span> } <span class="cmt">// inject saved session</span>
+};</code></pre>
+
+          <ul class="key-points">
+            <li>Storage state login is 10× faster than UI login per test</li>
+            <li>Fixtures scope: <code>test</code> (default), <code>worker</code>, or <code>session</code></li>
+            <li>Worker-scoped fixtures are shared across tests in the same worker process</li>
+          </ul>
+
+          <div class="quiz-section">
+            <div class="quiz-q">What's the main advantage of using <code>storageState</code> for authentication?</div>
+            <div class="quiz-options">
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">It makes your tests more readable</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, true)">It bypasses the UI login flow, making tests faster and more reliable</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">It allows testing without a real backend</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">It automatically rotates test credentials</button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="mark-done-btn" onclick="markDone('lesson-11')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+      <!-- Lesson 12 -->
+      <div class="lesson-card" id="lesson-12">
+        <div class="lesson-header" onclick="toggleLesson('lesson-12')">
+          <div class="lesson-num">12</div>
+          <div class="lesson-info">
+            <div class="lesson-title">API Mocking & Network Interception</div>
+            <div class="lesson-meta">Advanced · 15 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>Why Mock APIs?</h3>
+          <p>Network interception lets you test edge cases (errors, timeouts, empty states) that are hard to reproduce with a real backend, and speeds up tests by 3-5× by eliminating real HTTP calls.</p>
+
+          <h3>Intercept & Mock a Response</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="fn">test</span>(<span class="str">'shows empty state when no products'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="cmt">// Intercept before navigating</span>
+  <span class="kw">await</span> page.<span class="fn">route</span>(<span class="str">'**/api/products'</span>, route => {
+    route.<span class="fn">fulfill</span>({
+      status: <span class="num">200</span>,
+      contentType: <span class="str">'application/json'</span>,
+      body: <span class="cls">JSON</span>.<span class="fn">stringify</span>([]) <span class="cmt">// empty list</span>
+    });
+  });
+
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/products'</span>);
+  <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">getByText</span>(<span class="str">'No products found'</span>)).<span class="fn">toBeVisible</span>();
+});
+
+<span class="fn">test</span>(<span class="str">'handles API error gracefully'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">await</span> page.<span class="fn">route</span>(<span class="str">'**/api/products'</span>, route => {
+    route.<span class="fn">fulfill</span>({ status: <span class="num">500</span>, body: <span class="str">'Internal Server Error'</span> });
+  });
+
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/products'</span>);
+  <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">getByRole</span>(<span class="str">'alert'</span>)).<span class="fn">toContainText</span>(<span class="str">'Something went wrong'</span>);
+});</code></pre>
+
+          <h3>Modify (Not Replace) Real Responses</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="kw">await</span> page.<span class="fn">route</span>(<span class="str">'**/api/user'</span>, <span class="kw">async</span> route => {
+  <span class="cmt">// Let the real request go through...</span>
+  <span class="kw">const</span> response = <span class="kw">await</span> route.<span class="fn">fetch</span>();
+  <span class="kw">const</span> json = <span class="kw">await</span> response.<span class="fn">json</span>();
+
+  <span class="cmt">// ...then modify the response</span>
+  json.role = <span class="str">'admin'</span>; <span class="cmt">// pretend the user is an admin</span>
+  <span class="kw">await</span> route.<span class="fn">fulfill</span>({ json });
+});</code></pre>
+
+          <h3>Spy on Requests (No Interception)</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">// Assert an API call was made with correct payload</span>
+<span class="kw">const</span> requestPromise = page.<span class="fn">waitForRequest</span>(<span class="str">'**/api/orders'</span>);
+<span class="kw">await</span> page.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">'Place Order'</span> }).<span class="fn">click</span>();
+
+<span class="kw">const</span> request = <span class="kw">await</span> requestPromise;
+<span class="fn">expect</span>(request.<span class="fn">method</span>()).toBe(<span class="str">'POST'</span>);
+<span class="fn">expect</span>(request.<span class="fn">postDataJSON</span>()).<span class="fn">toMatchObject</span>({ items: [{ id: <span class="num">42</span> }] });</code></pre>
+
+          <button class="mark-done-btn" onclick="markDone('lesson-12')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+      <!-- Lesson 13 -->
+      <div class="lesson-card" id="lesson-13">
+        <div class="lesson-header" onclick="toggleLesson('lesson-13')">
+          <div class="lesson-num">13</div>
+          <div class="lesson-info">
+            <div class="lesson-title">Tracing, Debugging & Test Reports</div>
+            <div class="lesson-meta">DevOps · 12 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>Playwright Trace Viewer</h3>
+          <p>Traces record a full timeline of your test — every action, screenshot, network request, and console log — so you can replay failures locally with perfect fidelity.</p>
+
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">// playwright.config.ts — enable traces on failure</span>
+<span class="kw">export default</span> {
+  use: {
+    trace: <span class="str">'on-first-retry'</span>,    <span class="cmt">// record on retry</span>
+    screenshot: <span class="str">'only-on-failure'</span>,
+    video: <span class="str">'retain-on-failure'</span>
+  }
+};
+
+<span class="cmt"># View a trace file</span>
+npx playwright show-trace trace.zip
+
+<span class="cmt"># Or open the full HTML report</span>
+npx playwright show-report</code></pre>
+
+          <h3>Debugging Mid-Test</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">// Pause and open DevTools in headed mode</span>
+<span class="kw">await</span> page.<span class="fn">pause</span>(); <span class="cmt">// Playwright Inspector opens here</span>
+
+<span class="cmt"># Run in debug mode (step through actions)</span>
+PWDEBUG=<span class="num">1</span> npx playwright test
+
+<span class="cmt"># Or use the VS Code extension</span>
+<span class="cmt"># Install: ms-playwright.playwright</span></code></pre>
+
+          <h3>Soft Assertions — Don't Stop on First Failure</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="fn">test</span>(<span class="str">'full page audit'</span>, <span class="kw">async</span> ({ page }) => {
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/dashboard'</span>);
+
+  <span class="cmt">// soft assertions — test continues even if these fail</span>
+  <span class="kw">await</span> <span class="fn">expect</span>.<span class="fn">soft</span>(page.<span class="fn">getByRole</span>(<span class="str">'heading'</span>)).<span class="fn">toBeVisible</span>();
+  <span class="kw">await</span> <span class="fn">expect</span>.<span class="fn">soft</span>(page.<span class="fn">getByText</span>(<span class="str">'Revenue'</span>)).<span class="fn">toBeVisible</span>();
+  <span class="kw">await</span> <span class="fn">expect</span>.<span class="fn">soft</span>(page.<span class="fn">getByRole</span>(<span class="str">'table'</span>)).<span class="fn">toBeVisible</span>();
+
+  <span class="cmt">// hard assertion — fails here if any soft ones failed</span>
+  <span class="fn">expect</span>(test.<span class="fn">info</span>().errors).<span class="fn">toHaveLength</span>(<span class="num">0</span>);
+});</code></pre>
+
+          <ul class="key-points">
+            <li>Use <code>trace: 'on-first-retry'</code> in CI to avoid trace overhead on green runs</li>
+            <li>Playwright's HTML report shows test timeline, screenshots, and videos in one place</li>
+            <li>Soft assertions are great for visual audits — collect all failures at once</li>
+          </ul>
+
+          <button class="mark-done-btn" onclick="markDone('lesson-13')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MODULE 5: CI/CD ── -->
+  <div id="mod-cicd" class="module">
+    <div class="lesson-grid">
+
+      <!-- Lesson 14 -->
+      <div class="lesson-card" id="lesson-14">
+        <div class="lesson-header" onclick="toggleLesson('lesson-14')">
+          <div class="lesson-num">14</div>
+          <div class="lesson-info">
+            <div class="lesson-title">GitHub Actions — Full CI Pipeline</div>
+            <div class="lesson-meta">DevOps · 15 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>Complete GitHub Actions Workflow</h3>
+          <p>This workflow runs Playwright tests on every push and PR, uploads reports as artifacts, and posts results as a PR comment.</p>
+
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt"># .github/workflows/playwright.yml</span>
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: <span class="str">'npm'</span>
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      <span class="cmt"># Optional: start your app locally</span>
+      - name: Start app
+        run: npm run start &
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Run Playwright Tests
+        run: npx playwright test
+        env:
+          BASE_URL: http://localhost:3000
+          CI: true
+
+      <span class="cmt"># Always upload report, even on failure</span>
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30</code></pre>
+
+          <h3>Sharding for Parallelism</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt"># Run 4 shards in parallel — 4× faster!</span>
+strategy:
+  matrix:
+    shard: [1, 2, 3, 4]
+
+steps:
+  - name: Run tests (shard ${{ matrix.shard }}/4)
+    run: npx playwright test --shard=${{ matrix.shard }}/4
+
+  - uses: actions/upload-artifact@v4
+    if: always()
+    with:
+      name: blob-report-${{ matrix.shard }}
+      path: blob-report/
+
+<span class="cmt"># Merge reports from all shards</span>
+merge-reports:
+  needs: [test]
+  runs-on: ubuntu-latest
+  steps:
+    - run: npx playwright merge-reports --reporter html ./all-blob-reports
+    - uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report
+        path: playwright-report/</code></pre>
+
+          <ul class="key-points">
+            <li>Always use <code>--with-deps</code> when installing browsers in CI — it installs system libs</li>
+            <li>Cache <code>~/.cache/ms-playwright</code> to avoid re-downloading browsers every run</li>
+            <li>Sharding cuts CI time proportionally — 4 shards = ~4× speedup</li>
+            <li>Set <code>CI: true</code> env var — Playwright automatically retries flaky tests in CI</li>
+          </ul>
+
+          <div class="quiz-section">
+            <div class="quiz-q">What does <code>npx playwright test --shard=2/4</code> do?</div>
+            <div class="quiz-options">
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">Runs tests 2 times with 4 workers</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, true)">Runs the 2nd quarter of all tests (for parallel CI execution)</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">Runs only the 2nd test file with 4 retries</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">Splits tests across 2 browsers with 4 tabs each</button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="mark-done-btn" onclick="markDone('lesson-14')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+      <!-- Lesson 15 -->
+      <div class="lesson-card" id="lesson-15">
+        <div class="lesson-header" onclick="toggleLesson('lesson-15')">
+          <div class="lesson-num">15</div>
+          <div class="lesson-info">
+            <div class="lesson-title">playwright.config.ts — Master Configuration</div>
+            <div class="lesson-meta">Config · 10 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>Production-Ready Config</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">// playwright.config.ts</span>
+<span class="kw">import</span> { <span class="fn">defineConfig</span>, devices } <span class="kw">from</span> <span class="str">'@playwright/test'</span>;
+
+<span class="kw">export default</span> <span class="fn">defineConfig</span>({
+  testDir: <span class="str">'./tests'</span>,
+  fullyParallel: <span class="kw">true</span>,
+  forbidOnly: !!process.env.CI,   <span class="cmt">// fail if test.only committed</span>
+  retries: process.env.CI ? <span class="num">2</span> : <span class="num">0</span>, <span class="cmt">// retry twice in CI only</span>
+  workers: process.env.CI ? <span class="num">4</span> : <span class="kw">undefined</span>,
+  reporter: [
+    [<span class="str">'html'</span>],
+    [<span class="str">'junit'</span>, { outputFile: <span class="str">'results.xml'</span> }], <span class="cmt">// for CI integrations</span>
+  ],
+
+  use: {
+    baseURL: process.env.BASE_URL ?? <span class="str">'http://localhost:3000'</span>,
+    trace: <span class="str">'on-first-retry'</span>,
+    screenshot: <span class="str">'only-on-failure'</span>,
+    video: <span class="str">'retain-on-failure'</span>,
+    actionTimeout: <span class="num">10_000</span>,    <span class="cmt">// 10s per action</span>
+    navigationTimeout: <span class="num">30_000</span>, <span class="cmt">// 30s per navigation</span>
+  },
+
+  projects: [
+    <span class="cmt">// Setup project (runs first)</span>
+    { name: <span class="str">'setup'</span>, testMatch: <span class="str">'**/auth.setup.ts'</span> },
+
+    <span class="cmt">// Test projects</span>
+    {
+      name: <span class="str">'chromium'</span>,
+      use: { ...devices[<span class="str">'Desktop Chrome'</span>] },
+      dependencies: [<span class="str">'setup'</span>],
+    },
+    {
+      name: <span class="str">'firefox'</span>,
+      use: { ...devices[<span class="str">'Desktop Firefox'</span>] },
+      dependencies: [<span class="str">'setup'</span>],
+    },
+    {
+      name: <span class="str">'mobile-safari'</span>,
+      use: { ...devices[<span class="str">'iPhone 14'</span>] },
+      dependencies: [<span class="str">'setup'</span>],
+    },
+  ],
+
+  <span class="cmt">// Start dev server before tests run</span>
+  webServer: {
+    command: <span class="str">'npm run dev'</span>,
+    url: <span class="str">'http://localhost:3000'</span>,
+    reuseExistingServer: !process.env.CI,
+  },
+});</code></pre>
+
+          <ul class="key-points">
+            <li><code>forbidOnly</code> prevents accidentally merging <code>test.only</code> to main</li>
+            <li><code>webServer</code> auto-starts your app and waits for it to be ready</li>
+            <li><code>devices</code> presets configure viewport, user agent, and touch correctly</li>
+            <li>Use <code>dependencies</code> to ensure auth setup runs before test projects</li>
+          </ul>
+
+          <button class="mark-done-btn" onclick="markDone('lesson-15')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MODULE 6: CAPSTONE PROJECT ── -->
+  <div id="mod-project" class="module">
+    <div class="lesson-grid">
+
+      <!-- Lesson 16 -->
+      <div class="lesson-card" id="lesson-16">
+        <div class="lesson-header" onclick="toggleLesson('lesson-16')">
+          <div class="lesson-num">16</div>
+          <div class="lesson-info">
+            <div class="lesson-title">Capstone: E-Commerce Test Suite with AI + MCP</div>
+            <div class="lesson-meta">Project · 45 min</div>
+          </div>
+          <span class="lesson-status status-new">NEW</span>
+        </div>
+        <div class="lesson-body">
+          <h3>Project Overview</h3>
+          <p>Build a full test suite for an e-commerce app covering authentication, product browsing, cart management, and checkout — using every technique from this course.</p>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;">
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;">
+              <div style="font-size:12px;color:var(--accent);font-weight:700;margin-bottom:8px;letter-spacing:1px;">WHAT YOU'LL BUILD</div>
+              <ul class="key-points" style="font-size:13px;">
+                <li>Auth fixture with storageState</li>
+                <li>Page Objects for 4 pages</li>
+                <li>API mocking for checkout</li>
+                <li>AI-generated edge cases</li>
+                <li>GitHub Actions CI pipeline</li>
+                <li>MCP agent smoke test</li>
+              </ul>
+            </div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;">
+              <div style="font-size:12px;color:var(--accent3);font-weight:700;margin-bottom:8px;letter-spacing:1px;">SKILLS APPLIED</div>
+              <ul class="key-points" style="font-size:13px;">
+                <li>POM Architecture</li>
+                <li>Custom Fixtures</li>
+                <li>Network Interception</li>
+                <li>AI Test Generation</li>
+                <li>MCP Integration</li>
+                <li>CI/CD Sharding</li>
+              </ul>
+            </div>
+          </div>
+
+          <h3>Step 1 — Project Structure</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>ecommerce-tests/
+├── playwright.config.ts
+├── auth.json                  <span class="cmt"># saved session</span>
+├── fixtures/
+│   └── auth.fixture.ts        <span class="cmt"># logged-in page fixture</span>
+├── pages/
+│   ├── LoginPage.ts
+│   ├── ProductListPage.ts
+│   ├── ProductDetailPage.ts
+│   └── CheckoutPage.ts
+├── tests/
+│   ├── auth.setup.ts          <span class="cmt"># global auth setup</span>
+│   ├── product-browse.spec.ts
+│   ├── cart.spec.ts
+│   └── checkout.spec.ts
+└── .github/
+    └── workflows/
+        └── playwright.yml</code></pre>
+
+          <h3>Step 2 — ProductListPage POM</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="kw">export class</span> <span class="cls">ProductListPage</span> {
+  <span class="fn">constructor</span>(<span class="kw">private</span> page: <span class="cls">Page</span>) {}
+
+  <span class="kw">async</span> <span class="fn">goto</span>() { <span class="kw">await</span> <span class="kw">this</span>.page.<span class="fn">goto</span>(<span class="str">'/products'</span>); }
+
+  <span class="fn">searchBox</span>() { <span class="kw">return</span> <span class="kw">this</span>.page.<span class="fn">getByRole</span>(<span class="str">'searchbox'</span>, { name: <span class="str">'Search products'</span> }); }
+  <span class="fn">productCards</span>() { <span class="kw">return</span> <span class="kw">this</span>.page.<span class="fn">getByRole</span>(<span class="str">'article'</span>); }
+  <span class="fn">filterByCategory</span>(cat: <span class="kw">string</span>) {
+    <span class="kw">return</span> <span class="kw">this</span>.page.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: cat }).<span class="fn">click</span>();
+  }
+  <span class="kw">async</span> <span class="fn">addToCart</span>(productName: <span class="kw">string</span>) {
+    <span class="kw">await</span> <span class="kw">this</span>.page
+      .<span class="fn">getByRole</span>(<span class="str">'article'</span>)
+      .<span class="fn">filter</span>({ hasText: productName })
+      .<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">'Add to cart'</span> })
+      .<span class="fn">click</span>();
+  }
+  <span class="kw">async</span> <span class="fn">getProductCount</span>(): Promise&lt;<span class="kw">number</span>&gt; {
+    <span class="kw">return</span> <span class="kw">await</span> <span class="kw">this</span>.<span class="fn">productCards</span>().<span class="fn">count</span>();
+  }
+}</code></pre>
+
+          <h3>Step 3 — Checkout Test with API Mock</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="fn">test</span>.<span class="fn">describe</span>(<span class="str">'Checkout'</span>, () => {
+  <span class="fn">test</span>(<span class="str">'successful order shows confirmation'</span>, <span class="kw">async</span> ({ authenticatedPage: page }) => {
+    <span class="kw">const</span> orderId = <span class="str">'ORD-99999'</span>;
+
+    <span class="cmt">// Mock the checkout API</span>
+    <span class="kw">await</span> page.<span class="fn">route</span>(<span class="str">'**/api/orders'</span>, route => route.<span class="fn">fulfill</span>({
+      json: { success: <span class="kw">true</span>, orderId, estimatedDelivery: <span class="str">'May 10'</span> }
+    }));
+
+    <span class="kw">const</span> checkout = <span class="kw">new</span> <span class="cls">CheckoutPage</span>(page);
+    <span class="kw">await</span> checkout.<span class="fn">goto</span>();
+    <span class="kw">await</span> checkout.<span class="fn">fillShipping</span>({ name: <span class="str">'Jane Doe'</span>, address: <span class="str">'123 Main St'</span> });
+    <span class="kw">await</span> checkout.<span class="fn">fillPayment</span>({ card: <span class="str">'4242424242424242'</span>, expiry: <span class="str">'12/28'</span>, cvv: <span class="str">'123'</span> });
+    <span class="kw">await</span> checkout.<span class="fn">placeOrder</span>();
+
+    <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">getByRole</span>(<span class="str">'heading'</span>, { name: <span class="str">/Order Confirmed/</span> })).<span class="fn">toBeVisible</span>();
+    <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">getByText</span>(orderId)).<span class="fn">toBeVisible</span>();
+  });
+
+  <span class="fn">test</span>(<span class="str">'payment failure shows error message'</span>, <span class="kw">async</span> ({ authenticatedPage: page }) => {
+    <span class="kw">await</span> page.<span class="fn">route</span>(<span class="str">'**/api/orders'</span>, route => route.<span class="fn">fulfill</span>({
+      status: <span class="num">402</span>, json: { error: <span class="str">'Card declined'</span> }
+    }));
+
+    <span class="kw">const</span> checkout = <span class="kw">new</span> <span class="cls">CheckoutPage</span>(page);
+    <span class="kw">await</span> checkout.<span class="fn">goto</span>();
+    <span class="kw">await</span> checkout.<span class="fn">placeOrder</span>();
+
+    <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">getByRole</span>(<span class="str">'alert'</span>)).<span class="fn">toContainText</span>(<span class="str">'Card declined'</span>);
+  });
+});</code></pre>
+
+          <h3>Step 4 — AI Prompt for Edge Cases</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="str">"""
+I have a checkout page with shipping + payment forms.
+The happy path test is already written (above).
+
+Generate 5 additional edge case tests covering:
+- Form validation (missing required fields)
+- Invalid card numbers
+- Session timeout during checkout  
+- Network failure during payment submission
+- Coupon code application (valid + invalid)
+
+Use the same POM pattern with CheckoutPage class.
+"""</span></code></pre>
+
+          <h3>Step 5 — MCP Smoke Test</h3>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code><span class="cmt">// Prompt to Claude Desktop (with Playwright MCP connected):</span>
+<span class="str">"Go to http://localhost:3000, 
+ add any product to the cart,
+ proceed to checkout,
+ and take a screenshot confirming the order total is visible.
+ Report any errors you encounter."</span></code></pre>
+
+          <div class="quiz-section">
+            <div class="quiz-q">In the capstone project, why is the checkout API mocked instead of hitting a real backend?</div>
+            <div class="quiz-options">
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">Because Playwright can't reach external URLs</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">To avoid writing assertions</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, true)">To control the exact response (success, failure, specific order IDs) without real transactions</button>
+              <button class="quiz-opt" onclick="checkAnswer(this, false)">Because POM pattern requires mocking</button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="mark-done-btn" onclick="markDone('lesson-16')">✓ Mark as Complete</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Completion Banner -->
+    <div id="completionBanner" style="display:none;background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(0,229,255,0.1));border:1px solid rgba(16,185,129,0.3);border-radius:16px;padding:32px;text-align:center;margin-top:24px;">
+      <div style="font-size:48px;margin-bottom:12px;">🏆</div>
+      <div style="font-size:22px;font-weight:800;margin-bottom:8px;">Course Complete!</div>
+      <div style="color:var(--muted);font-size:14px;">You've mastered Playwright, AI-powered testing, and MCP integration.<br>You're ready to build production-grade test suites.</div>
+    </div>
+  </div>
+
+  <!-- ── MODULE 7: AI TUTOR PLAYGROUND ── -->
+  <div id="mod-playground" class="module">
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dot"></div>
+        <div class="playground-title">AI Playwright Tutor — Powered by Claude</div>
+      </div>
+      <div class="playground-body">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Ask anything about Playwright, AI testing, or MCP. The tutor will generate real code examples and explain concepts.</p>
+
+        <div class="suggested-prompts">
+          <button class="prompt-chip" onclick="setPrompt('How do I handle file uploads in Playwright?')">File uploads</button>
+          <button class="prompt-chip" onclick="setPrompt('Show me how to test an API with Playwright request interception')">API mocking</button>
+          <button class="prompt-chip" onclick="setPrompt('How do I run Playwright tests in CI/CD with GitHub Actions?')">CI/CD setup</button>
+          <button class="prompt-chip" onclick="setPrompt('Generate a test for a shopping cart add/remove flow')">Generate test</button>
+          <button class="prompt-chip" onclick="setPrompt('Explain playwright fixtures and how to use them')">Fixtures</button>
+          <button class="prompt-chip" onclick="setPrompt('How does MCP work with Claude for browser automation?')">MCP deep dive</button>
+          <button class="prompt-chip" onclick="setPrompt('How do I test iframes in Playwright?')">iframes</button>
+          <button class="prompt-chip" onclick="setPrompt('What is storageState and how does it speed up auth tests?')">storageState</button>
+          <button class="prompt-chip" onclick="setPrompt('Write a custom MCP server that exposes a Playwright screenshot tool')">Custom MCP server</button>
+          <button class="prompt-chip" onclick="setPrompt('How do I use Playwright with visual regression testing?')">Visual regression</button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="msg assistant">
+            👋 Hi! I'm your AI Playwright tutor. Ask me anything about Playwright testing, AI-powered automation, or MCP integration. I'll give you working code examples!
+          </div>
+        </div>
+
+        <div class="chat-input-row">
+          <input
+            type="text"
+            class="chat-input"
+            id="chatInput"
+            placeholder="Ask about Playwright, AI testing, or MCP..."
+            onkeydown="if(event.key==='Enter') sendMessage()"
+          />
+          <button class="chat-send" id="sendBtn" onclick="sendMessage()">
+            Send ↑
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODULE 5: CHEATSHEET ── -->
+  <div id="mod-cheatsheet" class="module">
+    <div class="cheatsheet">
+
+      <div class="cs-card">
+        <h3>Navigation</h3>
+        <code>page.goto(url)</code>
+        <code>page.goBack()</code>
+        <code>page.reload()</code>
+        <p>Always await. Playwright waits for load by default.</p>
+      </div>
+
+      <div class="cs-card">
+        <h3>Best Locators</h3>
+        <code>getByRole('button', {name})</code>
+        <code>getByLabel('Email')</code>
+        <code>getByTestId('submit')</code>
+        <p>Prefer role → label → testid → text</p>
+      </div>
+
+      <div class="cs-card">
+        <h3>Actions</h3>
+        <code>locator.click()</code>
+        <code>locator.fill('text')</code>
+        <code>locator.selectOption('val')</code>
+        <code>locator.check() / uncheck()</code>
+      </div>
+
+      <div class="cs-card">
+        <h3>Assertions</h3>
+        <code>expect(page).toHaveURL(/regex/)</code>
+        <code>expect(loc).toBeVisible()</code>
+        <code>expect(loc).toHaveText('...')</code>
+        <code>expect(loc).toHaveCount(3)</code>
+      </div>
+
+      <div class="cs-card">
+        <h3>Screenshots & Video</h3>
+        <code>page.screenshot({path:'s.png'})</code>
+        <code>context.tracing.start()</code>
+        <p>Add <code>video: 'on'</code> to playwright.config.ts</p>
+      </div>
+
+      <div class="cs-card">
+        <h3>Network</h3>
+        <code>page.route('**/api/**', fn)</code>
+        <code>page.waitForResponse('**/api')</code>
+        <code>route.fulfill({body: mockData})</code>
+      </div>
+
+      <div class="cs-card">
+        <h3>Keyboard & Mouse</h3>
+        <code>page.keyboard.press('Enter')</code>
+        <code>page.keyboard.type('text')</code>
+        <code>page.mouse.move(x, y)</code>
+        <code>locator.hover()</code>
+      </div>
+
+      <div class="cs-card">
+        <h3>Wait Strategies</h3>
+        <code>page.waitForURL('/dashboard')</code>
+        <code>page.waitForLoadState('networkidle')</code>
+        <code>locator.waitFor({state:'visible'})</code>
+      </div>
+
+      <div class="cs-card">
+        <h3>MCP Config</h3>
+        <code>"command": "npx"</code>
+        <code>"args": ["@playwright/mcp@latest"]</code>
+        <p>In claude_desktop_config.json under mcpServers</p>
+      </div>
+
+      <div class="cs-card">
+        <h3>Run Commands</h3>
+        <code>npx playwright test</code>
+        <code>npx playwright test --ui</code>
+        <code>npx playwright codegen</code>
+        <code>npx playwright show-report</code>
+      </div>
+
+      <div class="cs-card">
+        <h3>Config (playwright.config.ts)</h3>
+        <code>baseURL: 'http://localhost:3000'</code>
+        <code>use: { headless: false }</code>
+        <code>workers: 4</code>
+        <p>Set once, applies to all tests.</p>
+      </div>
+
+      <div class="cs-card">
+        <h3>AI Prompt Tips</h3>
+        <code>"Use POM pattern"</code>
+        <code>"Role-based locators only"</code>
+        <code>"Add negative test cases"</code>
+        <p>Always specify your conventions upfront.</p>
+      </div>
+
+      <div class="cs-card">
+        <h3>Fixtures Scope</h3>
+        <code>test.extend({ myFixture: ... })</code>
+        <code>scope: 'test'  // default</code>
+        <code>scope: 'worker' // shared</code>
+        <p>Worker scope = shared across tests in same worker.</p>
+      </div>
+
+      <div class="cs-card">
+        <h3>Storage State Auth</h3>
+        <code>context.storageState({path:'a.json'})</code>
+        <code>use: { storageState: 'auth.json' }</code>
+        <p>Log in once, reuse session. 10× faster than UI login.</p>
+      </div>
+
+      <div class="cs-card">
+        <h3>Network Mocking</h3>
+        <code>page.route('**/api/**', fn)</code>
+        <code>route.fulfill({ json: mockData })</code>
+        <code>route.fetch() // real request</code>
+        <p>Mock errors, empty states, or modify real responses.</p>
+      </div>
+
+      <div class="cs-card">
+        <h3>Soft Assertions</h3>
+        <code>expect.soft(loc).toBeVisible()</code>
+        <code>expect.soft(loc).toHaveText(...)</code>
+        <p>Test continues even if soft assertions fail. Collects all failures at once.</p>
+      </div>
+
+      <div class="cs-card">
+        <h3>CI Sharding</h3>
+        <code>--shard=1/4  --shard=2/4 ...</code>
+        <code>npx playwright merge-reports</code>
+        <p>Split tests across parallel CI jobs, merge reports at end.</p>
+      </div>
+
+      <div class="cs-card">
+        <h3>Tracing</h3>
+        <code>trace: 'on-first-retry'</code>
+        <code>npx playwright show-trace</code>
+        <p>Full timeline replay of failed tests — every action, screenshot, network call.</p>
+      </div>
+
+      <div class="cs-card">
+        <h3>MCP Tools Available</h3>
+        <code>playwright_navigate</code>
+        <code>playwright_screenshot</code>
+        <code>playwright_click / fill</code>
+        <code>playwright_evaluate</code>
+        <p>Claude calls these autonomously when MCP is connected.</p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Built for learning Playwright × AI × MCP &nbsp;·&nbsp; Lessons update as you complete them
+</footer>
+
+<script>
+// ── Tab switching ──
+function switchTab(tab) {
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('mod-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── Lesson toggle ──
+function toggleLesson(id) {
+  const card = document.getElementById(id);
+  const wasExpanded = card.classList.contains('expanded');
+  document.querySelectorAll('.lesson-card').forEach(c => c.classList.remove('expanded'));
+  if (!wasExpanded) card.classList.add('expanded');
+}
+
+// ── Quiz ──
+function checkAnswer(btn, isCorrect) {
+  const section = btn.closest('.quiz-section');
+  section.querySelectorAll('.quiz-opt').forEach(b => b.disabled = true);
+  const feedback = section.querySelector('.quiz-feedback');
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    feedback.textContent = '✅ Correct! Great understanding.';
+    feedback.className = 'quiz-feedback correct';
+  } else {
+    btn.classList.add('wrong');
+    section.querySelectorAll('.quiz-opt').forEach(b => {
+      if (b.onclick.toString().includes('true')) b.classList.add('correct');
+    });
+    feedback.textContent = '❌ Not quite. The highlighted answer is correct.';
+    feedback.className = 'quiz-feedback wrong';
+  }
+}
+
+// ── Mark done ──
+const completed = new Set();
+const totalLessons = 16;
+
+function markDone(id) {
+  completed.add(id);
+  const card = document.getElementById(id);
+  card.classList.add('completed');
+  card.classList.remove('expanded');
+  card.querySelector('.lesson-status').textContent = 'DONE';
+  card.querySelector('.lesson-status').className = 'lesson-status status-done';
+  updateProgress();
+}
+
+function updateProgress() {
+  const pct = Math.round((completed.size / totalLessons) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  if (pct === 100) {
+    const banner = document.getElementById('completionBanner');
+    if (banner) { banner.style.display = 'block'; banner.scrollIntoView({ behavior: 'smooth' }); }
+  }
+}
+
+// ── Copy code ──
+function copyCode(btn) {
+  const code = btn.nextSibling.textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+// ── AI Tutor ──
+function setPrompt(text) {
+  document.getElementById('chatInput').value = text;
+  document.getElementById('chatInput').focus();
+  // Auto-switch to playground tab
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('mod-playground').classList.add('active');
+  document.querySelector('[onclick="switchTab(\'playground\')"]').classList.add('active');
+}
+
+const conversationHistory = [];
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function formatReply(text) {
+  // Escape first, then selectively restore our own HTML
+  return text
+    .replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
+      `<pre style="background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:10px 0;"><code style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;color:#c9d1d9;">${escapeHtml(code.trimEnd())}</code></pre>`)
+    .replace(/`([^`]+)`/g, '<code style="font-family:\'JetBrains Mono\',monospace;font-size:12px;background:var(--code-bg);padding:2px 6px;border-radius:4px;color:var(--accent);">$1</code>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  const messagesEl = document.getElementById('chatMessages');
+  const sendBtn = document.getElementById('sendBtn');
+
+  // Add user message to UI and history
+  messagesEl.innerHTML += `<div class="msg user">${escapeHtml(msg)}</div>`;
+  conversationHistory.push({ role: 'user', content: msg });
+  input.value = '';
+  sendBtn.disabled = true;
+
+  // Add thinking indicator
+  const thinkingId = 'thinking-' + Date.now();
+  messagesEl.innerHTML += `
+    <div class="msg assistant" id="${thinkingId}">
+      <div class="thinking"><span></span><span></span><span></span></div>
+    </div>`;
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are an expert QA engineer and Playwright specialist who also specializes in AI-powered testing and the Model Context Protocol (MCP).
+
+Answer questions clearly with working TypeScript code examples when relevant. Be concise but complete. Format code in triple-backtick code blocks. Keep answers focused on Playwright, AI testing, and MCP topics. Remember context from earlier in our conversation.`,
+        messages: conversationHistory
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || 'Sorry, no response received.';
+
+    // Add assistant reply to history
+    conversationHistory.push({ role: 'assistant', content: reply });
+
+    document.getElementById(thinkingId).innerHTML = formatReply(reply);
+
+  } catch (err) {
+    document.getElementById(thinkingId).innerHTML =
+      '⚠️ Could not reach Claude API. Make sure you\'re using this inside the Claude.ai interface.';
+  }
+
+  sendBtn.disabled = false;
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+</script>
+</body>
+</html>
